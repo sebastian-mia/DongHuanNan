@@ -2,7 +2,8 @@
     "name": "Unity.XR.Content.Interaction.Analytics",
     "references": [
         "Unity.XR.Interaction.Toolkit",
-        "Unity.XR.Content.Interaction"
+        "Unity.XR.Content.Interaction",
+        "Unity.XR.Interaction.Toolkit.Samples.StarterAssets"
     ],
     "includePlatforms": [],
     "excludePlatforms": [

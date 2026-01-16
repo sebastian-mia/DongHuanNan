@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Bezier3D_ZForward : MonoBehaviour
+public class NewBezierBend : MonoBehaviour
 {
     public Transform[] cpArr;
     public ForceItem forceItem;
