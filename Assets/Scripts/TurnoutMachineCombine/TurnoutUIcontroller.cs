@@ -1,16 +1,30 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using QFramework;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TurnoutUIcontroller : MonoBehaviour
+public class TurnoutUIcontroller : MonoBehaviour, IController
 {
     public Button cutPowerButton;
+    public TurnoutID turnoutID;
+    private bool isHideUI;
+
+    void Start()
+    {
+        this.GetModel<TurnoutModel>().currentRoute.Register(value =>
+        {
+            if (value.TurnoutMachines[turnoutID].IsPowerCut)
+            {
+                isHideUI = value.TurnoutMachines[turnoutID].IsPowerCut;
+            }
+        });
+    }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Player") && !isHideUI)
         {
             ShowPowerCutUI();
         }
@@ -22,5 +36,10 @@ public class TurnoutUIcontroller : MonoBehaviour
         {
             cutPowerButton.gameObject.SetActive(true);
         }
+    }
+
+    public IArchitecture GetArchitecture()
+    {
+        return TurnoutApp.Interface;
     }
 }

@@ -14,7 +14,10 @@ public class TurnoutMachineController : MonoBehaviour, IController
     public TurnoutID turnoutID;
     public TurnoutState currentLocalTurnoutState;
     public TurnoutState targetLocalTurnoutState;
-    public XRSocketInteractor xRSocketInteractor;
+    public XRSocketInteractor handlerSocketInteractor;
+    public XRSocketInteractor turnoutLockNormalSocketInteractor;
+    public XRSocketInteractor turnoutLockReverseSocketInteractor;
+    private readonly string turnoutMachineHandlerTag = "TurnoutMachineHandler";
 
 
     public XRKnob xRKnob;
@@ -34,18 +37,53 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private bool isPowerCut;
     private Animator animator;
 
+    //LockTurnout
+    private readonly string lockTurnoutTag = "LockTurnout";
+    private readonly string turnoutNormalSideTag = "NormalSide";
+    private readonly string turnoutReverseSideTag = "ReverseSide";
+
+
     //Modle
     private TurnoutModel turnoutModel;
 
     public void Start()
     {
-        xRSocketInteractor = GetComponentInChildren<XRSocketInteractor>();
+        var xRSocketInteractors = GetComponentsInChildren<XRSocketInteractor>();
+        for (int i = 0; i < xRSocketInteractors.Length; i++)
+        {
+            if (xRSocketInteractors[i].CompareTag(turnoutMachineHandlerTag))
+            {
+                handlerSocketInteractor = xRSocketInteractors[i];
+            }
+
+            if (xRSocketInteractors[i].CompareTag(turnoutNormalSideTag))
+            {
+                turnoutLockNormalSocketInteractor = xRSocketInteractors[i];
+            }
+
+            if (xRSocketInteractors[i].CompareTag(turnoutReverseSideTag))
+            {
+                turnoutLockReverseSocketInteractor = xRSocketInteractors[i];
+            }
+        }
+
         rotationOnlySync = GetComponentInChildren<RotationOnlySync>();
         turnoutMoveTByKnob = GetComponentInChildren<TurnoutMoveTByKnob>();
 
-        if (xRSocketInteractor != null)
+        if (handlerSocketInteractor != null)
         {
-            xRSocketInteractor.selectEntered.AddListener(GetInteractables);
+            handlerSocketInteractor.selectEntered.AddListener(GetHandlerInteractables);
+        }
+
+        if (turnoutLockNormalSocketInteractor != null)
+        {
+            turnoutLockNormalSocketInteractor.selectEntered.AddListener(LockTurnout);
+            turnoutLockNormalSocketInteractor.selectExited.AddListener(UnLockTurnout);
+        }
+
+        if (turnoutLockReverseSocketInteractor != null)
+        {
+            turnoutLockReverseSocketInteractor.selectEntered.AddListener(LockTurnout);
         }
 
         animator = GetComponent<Animator>();
@@ -55,26 +93,50 @@ public class TurnoutMachineController : MonoBehaviour, IController
         turnoutModel = this.GetModel<TurnoutModel>();
     }
 
-    private void GetInteractables(SelectEnterEventArgs args)
+    private void GetHandlerInteractables(SelectEnterEventArgs args)
     {
-        if (args.interactableObject != null)
+        if (args.interactableObject != null && turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState ==
+            LockedState.Nothing)
         {
             rotationOnlySync.SetTarget(args.interactableObject.transform.GetChild(0));
             turnoutMoveTByKnob.knob = args.interactableObject.transform.GetComponentInParent<XRKnob>();
             rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = true;
-            xRKnob = args.interactableObject.transform.GetComponent<XRKnob>();
-            if (xRKnob != null)
-            {
-                // currentValue = xRKnob.value;
-                xRKnob.onValueChange.AddListener(EnableGrab);
-            }
-
             xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
             if (xRKnob != null && xRGrabInteractable != null)
             {
                 handlerRb = xRGrabInteractable.transform.GetComponent<Rigidbody>();
                 DisableGrab(xRGrabInteractable);
             }
+
+            xRKnob = args.interactableObject.transform.GetComponent<XRKnob>();
+            if (xRKnob != null)
+            {
+                // currentValue = xRKnob.value;
+                xRKnob.onValueChange.AddListener(EnableGrab);
+            }
+        }
+    }
+
+    public void LockTurnout(SelectEnterEventArgs args)
+    {
+        var animator = args.interactableObject.transform.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.SetBool(lockTurnoutTag, true);
+            if (args.interactorObject.transform.CompareTag(turnoutNormalSideTag))
+                turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Normal;
+            else
+                turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Reverse;
+        }
+    }
+
+    private void UnLockTurnout(SelectExitEventArgs args)
+    {
+        var animator = args.interactableObject.transform.GetComponent<Animator>();
+        if (animator != null)
+        {
+            animator.SetBool(lockTurnoutTag, false);
+            turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Nothing;
         }
     }
 
@@ -82,8 +144,8 @@ public class TurnoutMachineController : MonoBehaviour, IController
     {
         xRGrabInteractable.enabled = false;
         handlerRb.useGravity = false;
-        xRGrabInteractable.transform.position = xRSocketInteractor.transform.position;
-        xRGrabInteractable.transform.rotation = xRSocketInteractor.transform.rotation;
+        xRGrabInteractable.transform.position = handlerSocketInteractor.transform.position;
+        xRGrabInteractable.transform.rotation = handlerSocketInteractor.transform.rotation;
         xRKnob.enabled = true;
     }
 
@@ -139,6 +201,10 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void Update()
     {
+        if (turnoutID == TurnoutID.Turnout01)
+        {
+            Debug.Log("TurnoutLock:" + turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState);
+        }
     }
 
     public IArchitecture GetArchitecture()
