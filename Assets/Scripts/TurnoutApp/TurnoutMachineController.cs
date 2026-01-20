@@ -95,25 +95,41 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void GetHandlerInteractables(SelectEnterEventArgs args)
     {
-        if (args.interactableObject != null && turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState ==
-            LockedState.Nothing)
-        {
-            rotationOnlySync.SetTarget(args.interactableObject.transform.GetChild(0));
-            turnoutMoveTByKnob.knob = args.interactableObject.transform.GetComponentInParent<XRKnob>();
-            rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = true;
-            xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
-            if (xRKnob != null && xRGrabInteractable != null)
-            {
-                handlerRb = xRGrabInteractable.transform.GetComponent<Rigidbody>();
-                DisableGrab(xRGrabInteractable);
-            }
+        if (args.interactableObject == null) return;
+        if (turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState != LockedState.Nothing) return;
 
-            xRKnob = args.interactableObject.transform.GetComponent<XRKnob>();
-            if (xRKnob != null)
-            {
-                // currentValue = xRKnob.value;
-                xRKnob.onValueChange.AddListener(EnableGrab);
-            }
+        // 🔧 1. 立即绑定事件（Grab 还没关，实例稳定）
+        xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
+        xRKnob = args.interactableObject.transform.GetComponent<XRKnob>();
+        if (xRKnob != null)
+        {
+            xRKnob.onValueChange.RemoveListener(EnableGrab); // 防重复
+            xRKnob.onValueChange.AddListener(EnableGrab); // 立即绑
+        }
+
+        // 🔧 2. 1帧后再关 Grab、定位、开 Knob
+        StartCoroutine(DisableGrabNextFrame(args.interactableObject));
+    }
+
+    private IEnumerator DisableGrabNextFrame(IXRInteractable interactable)
+    {
+        yield return null; // 等LateUpdate事件落地
+
+        if (interactable is XRGrabInteractable grab)
+        {
+            grab.enabled = false; // 关闭抓取
+            handlerRb = grab.GetComponent<Rigidbody>();
+            handlerRb.useGravity = false;
+            grab.transform.position = handlerSocketInteractor.transform.position;
+            grab.transform.rotation = handlerSocketInteractor.transform.rotation;
+
+            // 3. 开 Knob（事件已绑好，无需再绑）
+            if (xRKnob) xRKnob.enabled = true;
+
+            // 4. 其余绑定
+            rotationOnlySync.SetTarget(grab.transform.GetChild(0));
+            rotationOnlySync.GetComponent<MeshRenderer>().enabled = true;
+            turnoutMoveTByKnob.knob = xRKnob;
         }
     }
 
@@ -151,34 +167,25 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void EnableGrab(float value)
     {
-        if (currentValue <= 0 + deathFloat)
-        {
-            if (value >= 1 - deathFloat)
-            {
-                xRKnob.enabled = false;
-                xRGrabInteractable.enabled = true;
-                handlerRb.useGravity = true;
-                currentValue = 1;
-                rotationOnlySync.RemoveTarget();
-                rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
-                currentLocalTurnoutState = TurnoutState.Reverse;
-                turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = currentLocalTurnoutState;
-            }
-        }
+        bool hitTop = currentValue <= 0 + deathFloat && value >= 1 - deathFloat;
+        bool hitBot = currentValue >= 1 - deathFloat && value <= 0 + deathFloat;
 
-        if (currentValue >= 1 - deathFloat)
+        if (hitTop || hitBot)
         {
-            if (value <= 0 + deathFloat)
-            {
-                xRKnob.enabled = false;
-                xRGrabInteractable.enabled = true;
-                handlerRb.useGravity = true;
-                currentValue = 0;
-                rotationOnlySync.RemoveTarget();
-                rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
-                currentLocalTurnoutState = TurnoutState.Normal;
-                turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = currentLocalTurnoutState;
-            }
+            // 🔧 强制让当前Socket释放物品（立即触发OnRelease）
+            var hostSocket = xRGrabInteractable.transform.parent.GetComponent<XRSocketInteractor>();
+            if (hostSocket && hostSocket.selectTarget == xRGrabInteractable)
+                hostSocket.interactionManager.SelectExit(hostSocket, xRGrabInteractable);
+
+            // 其余旧逻辑不变
+            xRKnob.enabled = false;
+            xRGrabInteractable.enabled = true;
+            handlerRb.useGravity = true;
+            currentValue = hitTop ? 1 : 0;
+            rotationOnlySync.RemoveTarget();
+            rotationOnlySync.GetComponent<MeshRenderer>().enabled = false;
+            currentLocalTurnoutState = hitTop ? TurnoutState.Reverse : TurnoutState.Normal;
+            turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = currentLocalTurnoutState;
         }
     }
 

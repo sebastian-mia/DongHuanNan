@@ -1849,7 +1849,7 @@ GameObject:
   - component: {fileID: 12631008683764832}
   m_Layer: 0
   m_Name: TurnoutMachineCombineLeft
-  m_TagString: Untagged
+  m_TagString: TurnoutMachineSocket
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 1
