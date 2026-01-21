@@ -50,7 +50,7 @@ public class WaistSlotItem : MonoBehaviour
         }
     }
 
-    /* 松手：保持自家 disabled → 延迟1帧遍历 → 再决定是否打开自家 */
+    /* 松手：保持自家 disabled → 延迟1秒后再决定是否拉回 */
     private void OnRelease(SelectExitEventArgs args)
     {
         if (args.interactorObject is XRDirectInteractor)
@@ -58,55 +58,35 @@ public class WaistSlotItem : MonoBehaviour
             rb.isKinematic = false;
             rb.useGravity  = true;
 
-            // 🔥保持自家 disabled，先不参与竞争
-            StartCoroutine(DecideAfterFrame());
+            // 🔥1秒后再判断
+            StartCoroutine(DelayedDecide());
         }
     }
 
-    /* 延迟1帧：让所有 Socket 先抢完 → 再决定回不回 */
-    private IEnumerator DecideAfterFrame()
+    /* 新增1秒延迟 */
+    private IEnumerator DelayedDecide()
     {
-        yield return null; // 等竞争完成
-
-        // 看谁捕获了本物品（自家仍 disabled，不会出现在结果里）
+        yield return new WaitForSeconds(1f);
+        // 下面完全复用你原来的逻辑
         var captor = FindObjectsOfType<XRSocketInteractor>()
                      .FirstOrDefault(s => s.selectTarget == grab);
 
         if (captor == null)
         {
-            // 没人捕获 → 打开自家并回家
             if (homeSocket != null)
             {
-                homeSocket.enabled = true; // 🔥现在才打开
-                // 启动自动飞回
+                homeSocket.enabled = true;
                 StartCoroutine(AutoSnapBack());
             }
         }
         else
         {
-            // 被别家捕获 → 留下，亮提示
             ShowGhost();
-            // 阻止自动飞回
             StopCoroutine(AutoSnapBack());
         }
     }
 
-    /* 回家协程：瞬移 → 强制塞进原槽 */
-    private IEnumerator ReturnToHomeSocket()
-    {
-        isReturning = true;
-
-        grab.enabled = false;
-        transform.SetPositionAndRotation(homeSocket.attachTransform.position,
-                                         homeSocket.attachTransform.rotation);
-        grab.enabled = true;
-
-        // homeSocket.StartManualInteraction(grab);   //🔧AutoSnap：改由 AutoSnapBack 负责
-        yield return new WaitUntil(() => homeSocket.selectTarget == grab);
-        isReturning = false;
-    }
-
-    //🔧AutoSnap：新增自动飞回并插回
+    /* 自动飞回并插回 */
     private IEnumerator AutoSnapBack()
     {
         yield return null; // 等 XR 释放完毕
