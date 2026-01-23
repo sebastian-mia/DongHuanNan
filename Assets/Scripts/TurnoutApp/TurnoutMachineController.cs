@@ -12,8 +12,9 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class TurnoutMachineController : MonoBehaviour, IController
 {
     public TurnoutID turnoutID;
-    public TurnoutState currentLocalTurnoutState;
-    public TurnoutState targetLocalTurnoutState;
+
+    // public TurnoutState currentLocalTurnoutState;
+    // public TurnoutState targetLocalTurnoutState;
     private XRSocketInteractor handlerSocketInteractor;
     private XRSocketInteractor turnoutLockNormalSocketInteractor;
     private XRSocketInteractor turnoutLockReverseSocketInteractor;
@@ -28,6 +29,9 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private float currentValue;
     private float deathFloat = 0.05f;
     private Rigidbody handlerRb;
+
+    [Header("如果道岔初始是反位需要勾选")] [SerializeField]
+    public bool isStartReverse;
 
     private RotationOnlySync rotationOnlySync;
     private TurnoutMoveTByKnob turnoutMoveTByKnob;
@@ -172,27 +176,18 @@ public class TurnoutMachineController : MonoBehaviour, IController
         {
             if (value >= 1 - deathFloat)
             {
-                xRKnobMeshRenderer.enabled = false;
-                for (int i = 0; i < xRKnobColliders.Length; i++)
-                {
-                    xRKnobColliders[i].enabled = false;
-                }
-
                 currentValue = 1;
-                xRKnob.enabled = false;
-                rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
-                currentLocalTurnoutState = TurnoutState.Reverse;
-                turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = currentLocalTurnoutState;
-                xRGrabInteractable.GetComponent<MeshRenderer>().enabled = true;
-                var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
-                for (int i = 0; i < xRGrabInteractableBoxcolliders.Length; i++)
+                if (isStartReverse)
                 {
-                    xRGrabInteractableBoxcolliders[i].enabled = true;
+                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Normal;
+                }
+                else
+                {
+                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Reverse;
                 }
 
-                handlerRb.useGravity = true;
-                waistSlotItem.enabled = false;
-                xRGrabInteractable.enabled = true;
+
+                ToggleHandler();
             }
         }
 
@@ -200,28 +195,43 @@ public class TurnoutMachineController : MonoBehaviour, IController
         {
             if (value <= 0 + deathFloat)
             {
-                xRKnobMeshRenderer.enabled = false;
-                for (int i = 0; i < xRKnobColliders.Length; i++)
-                {
-                    xRKnobColliders[i].enabled = false;
-                }
-
                 currentValue = 0;
-                xRKnob.enabled = false;
-                rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
-                currentLocalTurnoutState = TurnoutState.Normal;
-                xRGrabInteractable.GetComponent<MeshRenderer>().enabled = true;
-                var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
-                for (int i = 0; i < xRGrabInteractableBoxcolliders.Length; i++)
+                if (isStartReverse)
                 {
-                    xRGrabInteractableBoxcolliders[i].enabled = true;
+                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Reverse;
+                }
+                else
+                {
+                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Normal;
                 }
 
-                handlerRb.useGravity = true;
-                waistSlotItem.enabled = false;
-                xRGrabInteractable.enabled = true;
+                ToggleHandler();
             }
         }
+    }
+
+    private void ToggleHandler()
+    {
+        xRKnobMeshRenderer.enabled = false;
+        for (int i = 0; i < xRKnobColliders.Length; i++)
+        {
+            xRKnobColliders[i].enabled = false;
+        }
+
+
+        xRKnob.enabled = false;
+        rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
+
+        xRGrabInteractable.GetComponent<MeshRenderer>().enabled = true;
+        var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
+        for (int i = 0; i < xRGrabInteractableBoxcolliders.Length; i++)
+        {
+            xRGrabInteractableBoxcolliders[i].enabled = true;
+        }
+
+        handlerRb.useGravity = true;
+        waistSlotItem.enabled = false;
+        xRGrabInteractable.enabled = true;
     }
 
     private void CutPower()

@@ -1,6 +1,9 @@
 using UnityEngine;
 
-public class FollowForceItem : MonoBehaviour
+/// <summary>
+/// 仅在同父且 ForceItem 只改 localPosition 时适用
+/// </summary>
+public class FollowForceItemLocal : MonoBehaviour
 {
     [Header("必须拖入 ForceItem")]
     public Transform forceRoot;
@@ -8,35 +11,33 @@ public class FollowForceItem : MonoBehaviour
     [Header("仅勾选时移动一半距离")]
     public bool moveHalf = true;
 
-    private float lastParentX;
-    private bool  warned  = false;
+    private Vector3 lastLocalPos;
+    private bool    warned;
 
     void OnEnable()
     {
         if (!forceRoot)
         {
-            Debug.LogError("[FollowForceItem] forceRoot 未赋值，脚本无效！", this);
+            Debug.LogError("[FollowForceItemLocal] forceRoot 未赋值，脚本无效！", this);
             warned = true;
             enabled = false;
             return;
         }
-        lastParentX = forceRoot.position.x;
+
+        // 记录 ForceItem 的初始局部坐标
+        lastLocalPos = forceRoot.localPosition;
     }
 
-    void Update()
+    void LateUpdate()   // 用 LateUpdate 保证 ForceItem 先走完
     {
         if (!forceRoot) return;
 
-        float currX = forceRoot.position.x;
-        float delta = currX - lastParentX;
-        lastParentX = currX;
+        Vector3 currLocalPos = forceRoot.localPosition;
+        Vector3 localDelta   = currLocalPos - lastLocalPos;
 
-        float ratio   = moveHalf ? 0.5f : 1f;
-        float moveX   = delta * ratio;
+        float ratio = moveHalf ? 0.5f : 1f;
+        transform.localPosition += localDelta * ratio;
 
-        /* 只沿本地 X 轴移动：直接改 localPosition 的 x 分量 */
-        Vector3 lp = transform.localPosition;
-        lp.x += moveX;
-        transform.localPosition = lp;
+        lastLocalPos = currLocalPos;
     }
 }

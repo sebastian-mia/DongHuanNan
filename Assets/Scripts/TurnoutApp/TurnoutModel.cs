@@ -16,11 +16,11 @@ public class TurnoutModel : AbstractModel
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout02,
             new TurnoutMachine(TurnoutID.Turnout02, LockedState.Nothing, false, TurnoutState.Normal));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,
-            new TurnoutMachine(TurnoutID.Turnout03, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout03, LockedState.Nothing, false, TurnoutState.Reverse));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout04,
             new TurnoutMachine(TurnoutID.Turnout04, LockedState.Nothing, false, TurnoutState.Normal));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout05,
-            new TurnoutMachine(TurnoutID.Turnout05, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout05, LockedState.Nothing, false, TurnoutState.Reverse));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout06,
             new TurnoutMachine(TurnoutID.Turnout06, LockedState.Nothing, false, TurnoutState.Normal));
         targetRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, false));

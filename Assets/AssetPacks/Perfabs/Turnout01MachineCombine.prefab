@@ -24,13 +24,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 98275733274212046}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.70710564, y: -0.00000011175866, z: -0.00000050264447, w: -0.707108}
-  m_LocalPosition: {x: -0.064, y: 0.2351, z: 0}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.0679, y: 0, z: -0.2359}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3065488325502505923}
-  m_LocalEulerAnglesHint: {x: -270, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &312164619707309559
 GameObject:
   m_ObjectHideFlags: 0
@@ -823,8 +823,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turnoutID: 0
-  currentLocalTurnoutState: 0
-  targetLocalTurnoutState: 0
+  isStartReverse: 0
   teleportationAnchor: {fileID: 1833066818190947385}
   cutPowerButton: {fileID: 0}
   butterflyKey: {fileID: 8786855847309296422}
@@ -1571,14 +1570,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5392651172011626233}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.00000006759468, y: 0.000000074505806, z: 0.7071068, w: 0.7071068}
+  m_LocalRotation: {x: -0.5, y: -0.49999994, z: -0.5000001, w: -0.49999994}
   m_LocalPosition: {x: 0.6033764, y: 0.086899996, z: 1.3244}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1466469576859627879}
   m_Father: {fileID: 1809472386593472454}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 90}
+  m_LocalEulerAnglesHint: {x: 0, y: -270, z: 90}
 --- !u!135 &1070262070107340170
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -1618,7 +1617,7 @@ MonoBehaviour:
     m_Bits: 4294967295
   m_InteractionLayers:
     m_Bits: 8
-  m_AttachTransform: {fileID: 0}
+  m_AttachTransform: {fileID: 1466469576859627879}
   m_KeepSelectedTargetValid: 1
   m_DisableVisualsWhenBlockedInGroup: 1
   m_StartingSelectedInteractable: {fileID: 0}
