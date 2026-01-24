@@ -8,5 +8,8 @@ public class TurnoutApp : Architecture<TurnoutApp>
     protected override void Init()
     {
         this.RegisterModel(new TurnoutModel());
+
+        //Utility
+        this.RegisterUtility(new RandomNumber());
     }
 }

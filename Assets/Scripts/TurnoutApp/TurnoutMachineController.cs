@@ -133,9 +133,9 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
         animator.SetBool(lockTurnoutTag, true);
         if (args.interactorObject.transform.CompareTag(turnoutNormalSideTag))
-            turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Normal;
+            this.SendCommand<ToggleTurnoutLockToNormalCommand>(new ToggleTurnoutLockToNormalCommand(turnoutID));
         else
-            turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Reverse;
+            this.SendCommand<ToggleTurnoutLockToReverseCommand>(new ToggleTurnoutLockToReverseCommand(turnoutID));
     }
 
     private void UnLockTurnout(SelectExitEventArgs args)
@@ -144,7 +144,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
         if (animator == null) return;
 
         animator.SetBool(lockTurnoutTag, false);
-        turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Nothing;
+        this.SendCommand<ToggleTurnoutLockToNothingCommand>(new ToggleTurnoutLockToNothingCommand(turnoutID));
     }
 
     private void DisableHandler(XRGrabInteractable xRGrabInteractable, WaistSlotItem waistSlotItem)
@@ -179,11 +179,11 @@ public class TurnoutMachineController : MonoBehaviour, IController
                 currentValue = 1;
                 if (isStartReverse)
                 {
-                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Normal;
+                    this.SendCommand<ToggleTurnoutToNormalCommand>(new ToggleTurnoutToNormalCommand(turnoutID));
                 }
                 else
                 {
-                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Reverse;
+                    this.SendCommand<ToggleTurnoutToReverseCommand>(new ToggleTurnoutToReverseCommand(turnoutID));
                 }
 
 
@@ -198,11 +198,11 @@ public class TurnoutMachineController : MonoBehaviour, IController
                 currentValue = 0;
                 if (isStartReverse)
                 {
-                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Reverse;
+                    this.SendCommand<ToggleTurnoutToReverseCommand>(new ToggleTurnoutToReverseCommand(turnoutID));
                 }
                 else
                 {
-                    turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Normal;
+                    this.SendCommand<ToggleTurnoutToNormalCommand>(new ToggleTurnoutToNormalCommand(turnoutID));
                 }
 
                 ToggleHandler();
