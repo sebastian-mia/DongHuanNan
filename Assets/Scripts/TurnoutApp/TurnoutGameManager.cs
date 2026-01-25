@@ -12,20 +12,18 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private int correctCount = 0;
 
     //RouteShow
-    public Transform downSideToDownSideRouteShow;
-    public Transform downSideToTranslate1RouteShow;
-    public Transform downSideToTranslate2RouteShow;
-    public Transform translate1ToDownSideRouteShow;
-    public Transform translate2ToDownSideRouteShow;
-    public Transform upSideToTranslate1RouteShow;
-    public Transform upSideToTranslate2RouteShow;
-    public Transform translate1ToUpSideRouteShow;
-    public Transform translate2ToUpSideRouteShow;
-    public Transform upSideToUpSideRouteShow;
+    private readonly string downSideToDownSideRouteShowName = "DownSideToDownSide";
+    private readonly string downSideToTranslate1RouteShowName = "DownSideToTranslate1";
+    private readonly string downSideToTranslate2RouteShowName = "DownSideToTranslate2";
+    private readonly string translate1ToDownSideRouteShowName = "Translate1ToDownSide";
+    private readonly string translate2ToDownSideRouteShowName = "Translate2ToDownSide";
+    private readonly string upSideToTranslate1RouteShowName = "UpSideToTranslate1";
+    private readonly string upSideToTranslate2RouteShowName = "UpSideToTranslate2";
+    private readonly string translate1ToUpSideRouteShowName = "Translate1ToUpSide";
+    private readonly string translate2ToUpSideRouteShowName = "Translate2ToUpSide";
+    private readonly string upSideToUpSideRouteShowName = "UpSideToUpSide";
+    private readonly string targetRouteTip = "TargetRouteTip";
     private int randomNum;
-
-    //RouteTip
-    public TextMeshProUGUI targetRouteTip;
 
     void Awake()
     {
@@ -38,68 +36,70 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 ShowRoute();
             }
         });
+        UIManager.Instance.ScanCanvas();
     }
 
     private void CreateTargetRoute()
     {
         randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
+        var targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
-            targetRouteTip.text = "东环南路下行至福庆北路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至福庆北路下行进路";
             this.SendCommand<PerpareDownSideToDownSideRouteCommand>();
         }
 
         if (randomNum == 2)
         {
-            targetRouteTip.text = "东环南路下行至折1道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至折1道进路";
             this.SendCommand<PerpareDownSideToTranslate1RouteCommand>();
         }
 
         if (randomNum == 3)
         {
-            targetRouteTip.text = "东环南路下行至折2道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至折2道进路";
             this.SendCommand<PerpareDownSideToTranslate2RouteCommand>();
         }
 
         if (randomNum == 4)
         {
-            targetRouteTip.text = "折1道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "折1道至东环南路下行进路";
             this.SendCommand<PerpareTranslate1ToDownSideRouteCommand>();
         }
 
         if (randomNum == 5)
         {
-            targetRouteTip.text = "折2道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路下行进路";
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
         }
 
         if (randomNum == 6)
         {
-            targetRouteTip.text = "东环南路上行至邱隘东上行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至邱隘东上行进路";
             this.SendCommand<PerpareUpSideToUpSideRouteCommand>();
         }
 
         if (randomNum == 7)
         {
-            targetRouteTip.text = "东环南路上行至折1道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至折1道进路";
             this.SendCommand<PerpareUpSideToTranslate1RouteCommand>();
         }
 
         if (randomNum == 8)
         {
-            targetRouteTip.text = "东环南路上行至折2道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至折2道进路";
             this.SendCommand<PerpareUpSideToTranslate2RouteCommand>();
         }
 
         if (randomNum == 9)
         {
-            targetRouteTip.text = "折2道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路下行进路";
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
         }
 
         if (randomNum == 10)
         {
-            targetRouteTip.text = "折2道至东环南路上行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路上行进路";
             this.SendCommand<PerpareTranslate2ToUpSideRouteCommand>();
         }
     }
@@ -108,52 +108,52 @@ public class TurnoutGameManager : MonoBehaviour, IController
     {
         if (randomNum == 1)
         {
-            downSideToDownSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(downSideToDownSideRouteShowName);
         }
 
         if (randomNum == 2)
         {
-            downSideToTranslate1RouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(downSideToTranslate1RouteShowName);
         }
 
         if (randomNum == 3)
         {
-            downSideToTranslate2RouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(downSideToTranslate2RouteShowName);
         }
 
         if (randomNum == 4)
         {
-            translate1ToDownSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(translate1ToDownSideRouteShowName);
         }
 
         if (randomNum == 5)
         {
-            translate1ToUpSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
         }
 
         if (randomNum == 6)
         {
-            upSideToUpSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(upSideToUpSideRouteShowName);
         }
 
         if (randomNum == 7)
         {
-            upSideToTranslate1RouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(upSideToTranslate1RouteShowName);
         }
 
         if (randomNum == 8)
         {
-            upSideToTranslate2RouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(upSideToTranslate2RouteShowName);
         }
 
         if (randomNum == 9)
         {
-            translate2ToDownSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
         }
 
         if (randomNum == 10)
         {
-            translate2ToUpSideRouteShow.gameObject.SetActive(true);
+            UIManager.Instance.ShowUI(translate2ToUpSideRouteShowName);
         }
     }
 
@@ -163,17 +163,17 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
     void Update()
     {
-        var currents = this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines;
-        var targets = this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines;
-        foreach (var current in currents)
-        {
-            Debug.Log("Current TtunoutId:" + current.Value.TurnoutID + "TurnoutState" + current.Value.TurnoutState);
-        }
-
-        foreach (var target in targets)
-        {
-            Debug.Log("Target TtunoutId:" + target.Value.TurnoutID + "TurnoutState" + target.Value.TurnoutState);
-        }
+        // var currents = this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines;
+        // var targets = this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines;
+        // foreach (var current in currents)
+        // {
+        //     Debug.Log("Current TtunoutId:" + current.Value.TurnoutID + "TurnoutState" + current.Value.TurnoutState);
+        // }
+        //
+        // foreach (var target in targets)
+        // {
+        //     Debug.Log("Target TtunoutId:" + target.Value.TurnoutID + "TurnoutState" + target.Value.TurnoutState);
+        // }
     }
 
     public IArchitecture GetArchitecture()

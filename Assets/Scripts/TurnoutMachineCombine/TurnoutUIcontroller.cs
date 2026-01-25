@@ -7,34 +7,50 @@ using UnityEngine.UI;
 
 public class TurnoutUIcontroller : MonoBehaviour, IController
 {
-    public Button cutPowerButton;
     public TurnoutID turnoutID;
-    private bool isHideUI;
+    private CutPowerUI cutPowerUi;
+    private TurnoutModel turnoutModel;
 
     void Start()
     {
-        this.GetModel<TurnoutModel>().currentRoute.Register(value =>
+        turnoutModel = this.GetModel<TurnoutModel>();
+    }
+
+    private string ChooseUIByID()
+    {
+        switch (turnoutID)
         {
-            if (value.TurnoutMachines[turnoutID].IsPowerCut)
-            {
-                isHideUI = value.TurnoutMachines[turnoutID].IsPowerCut;
-            }
-        });
+            case TurnoutID.Turnout01:
+                return "Turnout01Panel";
+            case TurnoutID.Turnout02:
+                return "Turnout02Panel";
+            case TurnoutID.Turnout03:
+                return "Turnout03Panel";
+            case TurnoutID.Turnout04:
+                return "Turnout04Panel";
+            case TurnoutID.Turnout05:
+                return "Turnout05Panel";
+            case TurnoutID.Turnout06:
+                return "Turnout06Panel";
+        }
+
+        return null;
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Player") && !isHideUI)
+        if (other.CompareTag("Player") && !turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut)
         {
-            ShowPowerCutUI();
+            cutPowerUi = UIManager.Instance.ShowUI(ChooseUIByID()).GetComponent<CutPowerUI>();
+            cutPowerUi.OnShow();
         }
     }
 
-    private void ShowPowerCutUI()
+    private void OnTriggerExit(Collider other)
     {
-        if (cutPowerButton != null)
+        if (other.CompareTag("Player"))
         {
-            cutPowerButton.gameObject.SetActive(true);
+            cutPowerUi.OnHide();
         }
     }
 

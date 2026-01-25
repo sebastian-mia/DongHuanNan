@@ -38,10 +38,8 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     //UI
     public TeleportationAnchor teleportationAnchor;
-    public Button cutPowerButton;
     public Transform butterflyKey;
     private readonly string cutPowerTag = "CutPower";
-    private bool isPowerCut;
     private Animator animator;
 
     //LockTurnout
@@ -68,6 +66,14 @@ public class TurnoutMachineController : MonoBehaviour, IController
             xRKnob.onValueChange.AddListener(EnableHandler);
         }
 
+        //绑定事件
+        this.RegisterEvent<CutPowerEvent>(e =>
+        {
+            if (e.turnoutID == turnoutID)
+            {
+                PlayCutPowerAnimator();
+            }
+        });
 
         var xRSocketInteractors = GetComponentsInChildren<XRSocketInteractor>();
         for (int i = 0; i < xRSocketInteractors.Length; i++)
@@ -105,7 +111,6 @@ public class TurnoutMachineController : MonoBehaviour, IController
         }
 
         animator = GetComponent<Animator>();
-        cutPowerButton.onClick.AddListener(CutPower);
 
         //QFramework
         turnoutModel = this.GetModel<TurnoutModel>();
@@ -234,21 +239,15 @@ public class TurnoutMachineController : MonoBehaviour, IController
         xRGrabInteractable.enabled = true;
     }
 
-    private void CutPower()
+    private void PlayCutPowerAnimator()
     {
-        if (!isPowerCut)
-        {
-            cutPowerButton.gameObject.SetActive(false);
-            butterflyKey.gameObject.SetActive(true);
-            animator.SetTrigger(cutPowerTag);
-        }
+        butterflyKey.gameObject.SetActive(true);
+        animator.SetTrigger(cutPowerTag);
     }
 
     public void HideButterflyKey()
     {
         butterflyKey.gameObject.SetActive(false);
-        isPowerCut = true;
-        turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut = isPowerCut;
     }
 
     private void Update()

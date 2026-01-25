@@ -526,7 +526,6 @@ MonoBehaviour:
   turnoutID: 1
   isStartReverse: 0
   teleportationAnchor: {fileID: 8605455061611960611}
-  cutPowerButton: {fileID: 0}
   butterflyKey: {fileID: 702979778853866020}
 --- !u!1 &2284005702326825321
 GameObject:
@@ -1044,7 +1043,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &702979778853866020
 Transform:
   m_ObjectHideFlags: 0
@@ -1075,7 +1074,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3535404077430286645}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -2290,7 +2289,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dbf1eb73c2d4c54aad991e3d537d055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cutPowerButton: {fileID: 0}
   turnoutID: 0
 --- !u!65 &5105485196498169695
 BoxCollider:
