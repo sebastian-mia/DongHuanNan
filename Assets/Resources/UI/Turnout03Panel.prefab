@@ -142,8 +142,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u70B9\u51FB\u65AD\u7535"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: d5ed150290a927945b5d77458835c595, type: 2}
-  m_sharedMaterial: {fileID: 3857210452744406067, guid: d5ed150290a927945b5d77458835c595,
+  m_fontAsset: {fileID: 11400000, guid: e117d483e00ff314e8553e55b9ef80e5, type: 2}
+  m_sharedMaterial: {fileID: 6849757792922052146, guid: e117d483e00ff314e8553e55b9ef80e5,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

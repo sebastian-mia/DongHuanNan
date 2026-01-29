@@ -24,9 +24,11 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private readonly string upSideToUpSideRouteShowName = "UpSideToUpSide";
     private readonly string targetRouteTip = "TargetRouteTip";
     private int randomNum;
+    public Button returnButton;
 
     void Awake()
     {
+        returnButton.onClick.AddListener(ReturnMenuScene);
         turnoutModel = this.GetModel<TurnoutModel>();
         CreateTargetRoute();
         turnoutModel.isCorrectRoute.Register((value) =>
@@ -45,67 +47,68 @@ public class TurnoutGameManager : MonoBehaviour, IController
         var targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至福庆北路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至福庆北路下行进路";
             this.SendCommand<PerpareDownSideToDownSideRouteCommand>();
         }
 
         if (randomNum == 2)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至折1道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折1道进路";
             this.SendCommand<PerpareDownSideToTranslate1RouteCommand>();
         }
 
         if (randomNum == 3)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路下行至折2道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折2道进路";
             this.SendCommand<PerpareDownSideToTranslate2RouteCommand>();
         }
 
         if (randomNum == 4)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "折1道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路下行进路";
             this.SendCommand<PerpareTranslate1ToDownSideRouteCommand>();
         }
 
         if (randomNum == 5)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
         }
 
         if (randomNum == 6)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至邱隘东上行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至邱隘东上行进路";
             this.SendCommand<PerpareUpSideToUpSideRouteCommand>();
         }
 
         if (randomNum == 7)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至折1道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折1道进路";
             this.SendCommand<PerpareUpSideToTranslate1RouteCommand>();
         }
 
         if (randomNum == 8)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "东环南路上行至折2道进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折2道进路";
             this.SendCommand<PerpareUpSideToTranslate2RouteCommand>();
         }
 
         if (randomNum == 9)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
         }
 
         if (randomNum == 10)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "折2道至东环南路上行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路上行进路";
             this.SendCommand<PerpareTranslate2ToUpSideRouteCommand>();
         }
     }
 
     private void ShowRoute()
     {
+        returnButton.gameObject.SetActive(true);
         if (randomNum == 1)
         {
             UIManager.Instance.ShowUI(downSideToDownSideRouteShowName);
@@ -155,6 +158,11 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UIManager.Instance.ShowUI(translate2ToUpSideRouteShowName);
         }
+    }
+
+    private void ReturnMenuScene()
+    {
+        VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }
 
     private void CaculateScore()
