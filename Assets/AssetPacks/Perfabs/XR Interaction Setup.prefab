@@ -160,7 +160,7 @@ MonoBehaviour:
   m_UpdateTrackingType: 0
   m_EnableInputTracking: 1
   m_EnableInputActions: 1
-  m_ModelPrefab: {fileID: 8270855663187062767, guid: 1392f805216c47742996d4742c80721c,
+  m_ModelPrefab: {fileID: 1970789698584393708, guid: fb7b95f484801a74998df0f1144c008b,
     type: 3}
   m_ModelParent: {fileID: 5441470520332180568}
   m_Model: {fileID: 0}
@@ -1250,7 +1250,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &9128009714090414930
 Transform:
   m_ObjectHideFlags: 0
@@ -1596,7 +1596,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &2032019937542447789
 Transform:
   m_ObjectHideFlags: 0
@@ -2585,7 +2585,8 @@ MonoBehaviour:
   m_SmoothMovement: 0
   m_FollowTightness: 10
   m_SnapThresholdDistance: 10
-  m_Reticle: {fileID: 0}
+  m_Reticle: {fileID: 7243613460673735873, guid: aadf84b30b6040346b1c35f72da3054e,
+    type: 3}
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 1
@@ -3021,7 +3022,8 @@ MonoBehaviour:
   m_SmoothMovement: 0
   m_FollowTightness: 10
   m_SnapThresholdDistance: 10
-  m_Reticle: {fileID: 0}
+  m_Reticle: {fileID: 7243613460673735873, guid: aadf84b30b6040346b1c35f72da3054e,
+    type: 3}
   m_BlockedReticle: {fileID: 0}
   m_StopLineAtFirstRaycastHit: 1
   m_StopLineAtSelection: 1
@@ -3054,6 +3056,7 @@ GameObject:
   - component: {fileID: 1519733842650422765}
   - component: {fileID: 6307492981976580184}
   - component: {fileID: 8768384413141507015}
+  - component: {fileID: 1485814983326975992}
   m_Layer: 0
   m_Name: Right Controller
   m_TagString: Untagged
@@ -3140,7 +3143,7 @@ MonoBehaviour:
   m_UpdateTrackingType: 0
   m_EnableInputTracking: 1
   m_EnableInputActions: 1
-  m_ModelPrefab: {fileID: 3475118261464492563, guid: 9f3369e30fbd31f4bb596b1a99babe83,
+  m_ModelPrefab: {fileID: 4592724079021985533, guid: fdbd1fddd86074049814ba4ae4b05d0e,
     type: 3}
   m_ModelParent: {fileID: 5281403145368839367}
   m_Model: {fileID: 0}
@@ -3391,6 +3394,21 @@ MonoBehaviour:
   - groupMember: {fileID: 3562812533826952635}
     overrideGroupMembers:
     - {fileID: 7344004727731000696}
+--- !u!114 &1485814983326975992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5958148222415906266}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39408d0fdd150a34483f471f92140024, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  inputDeviceCharacteristics: 512
+  pokeAttachTransform: {fileID: 0}
+  directAttachTransform: {fileID: 0}
 --- !u!1 &6007647931812738302
 GameObject:
   m_ObjectHideFlags: 0
@@ -3841,6 +3859,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turnDeadZone: 0.08
+  rotationSmoothing: 10
   drawGizmo: 1
 --- !u!1 &6892439667819423298
 GameObject:

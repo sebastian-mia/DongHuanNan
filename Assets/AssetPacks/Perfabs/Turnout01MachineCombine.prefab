@@ -418,7 +418,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dbf1eb73c2d4c54aad991e3d537d055, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cutPowerButton: {fileID: 0}
   turnoutID: 0
 --- !u!65 &6991095961283500723
 BoxCollider:
@@ -581,7 +580,7 @@ MonoBehaviour:
   m_Handle: {fileID: 7034901015199449163}
   m_Value: 0
   m_ClampedMotion: 1
-  m_MaxAngle: 2048
+  m_MaxAngle: 4096
   m_MinAngle: 0
   m_AngleIncrement: 0
   m_PositionTrackedRadius: 0
@@ -825,7 +824,6 @@ MonoBehaviour:
   turnoutID: 0
   isStartReverse: 0
   teleportationAnchor: {fileID: 1833066818190947385}
-  cutPowerButton: {fileID: 0}
   butterflyKey: {fileID: 8786855847309296422}
 --- !u!1 &3546343683306276494
 GameObject:

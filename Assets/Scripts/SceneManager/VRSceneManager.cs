@@ -7,6 +7,7 @@ using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils;
+using System.Collections;
 
 public class VRSceneManager : MonoBehaviour
 {
@@ -38,6 +39,8 @@ public class VRSceneManager : MonoBehaviour
     private bool wasLocomotionEnabled = true;
     private bool isMovementRestricted = false;
 
+    public static event Action<Transform> OnXROriginChanged;
+    
     public event Action<string> OnSceneLoaded;
     public event Action<string> OnSceneUnloaded;
 
@@ -55,11 +58,7 @@ public class VRSceneManager : MonoBehaviour
         if (locomotionSystem == null)
             locomotionSystem = FindObjectOfType<LocomotionSystem>();
 
-        if (xrOrigin == null)
-        {
-            var xro = FindObjectOfType<XROrigin>();
-            if (xro != null) xrOrigin = xro.transform;
-        }
+        EnsureXROrigin();
         
         cameraFader?.SetTransparent();
     }
@@ -70,7 +69,6 @@ public class VRSceneManager : MonoBehaviour
         if (IsSceneLoaded(sceneName)) return;
 
         isLoading = true;
-        Transform targetSpawnPoint = null;
 
         if (disableMovementDuringLoading)
         {
@@ -137,19 +135,15 @@ public class VRSceneManager : MonoBehaviour
 
             OnSceneLoaded?.Invoke(sceneName);
 
-            if (autoMoveToSpawnPoint && xrOrigin != null && newScene.IsValid())
-            {
-                targetSpawnPoint = FindSpawnPointInScene(newScene);
-                if (targetSpawnPoint != null)
-                {
-                    MoveXROriginToPoint(targetSpawnPoint);
-                    await Task.Yield();
-                }
-            }
-
             if (newScene.IsValid() && setActive)
             {
                 SceneManager.SetActiveScene(newScene);
+            }
+
+            if (autoMoveToSpawnPoint && xrOrigin != null && newScene.IsValid())
+            {
+                var moveTask = MoveXROriginToSceneStartPointAsync(newScene);
+                await moveTask;
             }
 
             CheckAndApplyMovementRestriction(sceneName);
@@ -261,14 +255,12 @@ public class VRSceneManager : MonoBehaviour
 
             OnSceneLoaded?.Invoke(newSceneName);
 
-            if (autoMoveToSpawnPoint && xrOrigin != null)
+            EnsureXROrigin();
+
+            if (autoMoveToSpawnPoint && xrOrigin != null && newScene.IsValid())
             {
-                var targetSpawnPoint = FindSpawnPointInScene(newScene);
-                if (targetSpawnPoint != null)
-                {
-                    MoveXROriginToPoint(targetSpawnPoint);
-                    await Task.Yield();
-                }
+                var moveTask = MoveXROriginToSceneStartPointAsync(newScene);
+                await moveTask;
             }
 
             CheckAndApplyMovementRestriction(newSceneName);
@@ -297,6 +289,142 @@ public class VRSceneManager : MonoBehaviour
                 SetLocomotionEnabled(true);
                 SetInteractionsEnabled(true);
             }
+        }
+    }
+
+    private async Task MoveXROriginToSceneStartPointAsync(Scene scene)
+    {
+        if (xrOrigin == null || !scene.IsValid()) return;
+
+        Transform spawnPoint = FindSpawnPointInScene(scene);
+        
+        if (spawnPoint != null)
+        {
+            Debug.Log($"[VRSceneManager] 找到StartPoint: {spawnPoint.position}，准备使用协程移动");
+            
+            var tcs = new TaskCompletionSource<object>();
+            StartCoroutine(MoveXROriginCoroutine(spawnPoint, tcs));
+            await tcs.Task;
+        }
+        else
+        {
+            Debug.LogWarning($"[VRSceneManager] 场景 {scene.name} 中未找到StartPoint (Tag: {spawnPointTag})");
+        }
+    }
+
+    private IEnumerator MoveXROriginCoroutine(Transform targetPoint, TaskCompletionSource<object> tcs)
+    {
+        if (xrOrigin == null || targetPoint == null)
+        {
+            tcs.TrySetResult(null);
+            yield break;
+        }
+
+        Transform xrSetup = xrOrigin.parent;
+        XROrigin xrOriginComp = xrOrigin.GetComponent<XROrigin>();
+        CharacterController charCtrl = xrOrigin.GetComponent<CharacterController>();
+
+        Debug.Log($"[VRSceneManager] 协程开始: 当前XROrigin位置={xrOrigin.position}, 本地={xrOrigin.localPosition}, 目标={targetPoint.position}");
+
+        // 第1步: 禁用所有可能干扰位置的组件
+        if (charCtrl != null) charCtrl.enabled = false;
+        if (xrOriginComp != null) xrOriginComp.enabled = false;
+
+        yield return null;
+
+        // 第2步: 【关键】强制重置XROrigin本地变换为绝对零（解决MenuScene偏移问题）
+        xrOrigin.localPosition = Vector3.zero;
+        xrOrigin.localRotation = Quaternion.identity;
+        xrOrigin.localScale = Vector3.one;
+        
+        // 强制刷新
+        xrOrigin.GetComponent<Transform>();
+        
+        yield return null;
+        
+        Debug.Log($"[VRSceneManager] 重置本地变换后: XROrigin世界={xrOrigin.position}, 本地={xrOrigin.localPosition}");
+
+        // 第3步: 【关键】计算父物体应该的位置，使得XROrigin世界位置等于targetPoint
+        if (xrSetup != null)
+        {
+            // 父物体位置 = 目标位置 - XROrigin本地位置（应该是零）
+            // 但为了保险，还是计算一下
+            Vector3 setupTargetPos = targetPoint.position - xrOrigin.localPosition;
+            xrSetup.position = setupTargetPos;
+            xrSetup.rotation = targetPoint.rotation;
+            
+            // 强制刷新
+            xrSetup.GetComponent<Transform>();
+            
+            yield return null;
+            
+            Debug.Log($"[VRSceneManager] 移动父物体后: 父物体={xrSetup.position}, XROrigin={xrOrigin.position}");
+            
+            // 第4步: 【保险】如果还有偏差，直接强制设置
+            if (Vector3.Distance(xrOrigin.position, targetPoint.position) > 0.01f)
+            {
+                Debug.LogWarning($"[VRSceneManager] 位置有偏差，强制修正: {Vector3.Distance(xrOrigin.position, targetPoint.position)}");
+                
+                // 重新计算父物体位置
+                xrSetup.position = targetPoint.position - xrOrigin.localPosition;
+                xrSetup.GetComponent<Transform>();
+                
+                yield return null;
+            }
+        }
+        else
+        {
+            // 没有父物体，直接移动
+            xrOrigin.position = targetPoint.position;
+            xrOrigin.rotation = targetPoint.rotation;
+            
+            yield return null;
+            
+            Debug.Log($"[VRSceneManager] 直接移动XROrigin到: {xrOrigin.position}");
+        }
+
+        // 第5步: 强制同步物理系统
+        Physics.SyncTransforms();
+        yield return null;
+
+        // 第6步: 重新启用组件
+        if (xrOriginComp != null) xrOriginComp.enabled = true;
+        
+        if (charCtrl != null) 
+        {
+            charCtrl.transform.position = xrOrigin.position;
+            charCtrl.transform.rotation = xrOrigin.rotation;
+            charCtrl.enabled = true;
+        }
+
+        yield return null;
+
+        Debug.Log($"[VRSceneManager] 协程完成: XROrigin最终位置={xrOrigin.position}, 目标={targetPoint.position}, 差值={Vector3.Distance(xrOrigin.position, targetPoint.position)}");
+
+        tcs.TrySetResult(null);
+    }
+
+    private void EnsureXROrigin()
+    {
+        Transform previousXrOrigin = xrOrigin;
+        
+        if (xrOrigin == null)
+        {
+            var xro = FindObjectOfType<XROrigin>();
+            if (xro != null)
+            {
+                xrOrigin = xro.transform;
+                Debug.Log("[VRSceneManager] 找到 XROrigin");
+            }
+            else
+            {
+                Debug.LogError("[VRSceneManager] 未找到 XROrigin！");
+            }
+        }
+
+        if (xrOrigin != previousXrOrigin && xrOrigin != null)
+        {
+            OnXROriginChanged?.Invoke(xrOrigin);
         }
     }
 
@@ -384,6 +512,7 @@ public class VRSceneManager : MonoBehaviour
     private Transform FindSpawnPointInScene(Scene scene)
     {
         if (!scene.IsValid()) return null;
+        
         GameObject[] rootObjects = scene.GetRootGameObjects();
         
         foreach (var root in rootObjects)
@@ -391,41 +520,14 @@ public class VRSceneManager : MonoBehaviour
             if (root.CompareTag(spawnPointTag))
                 return root.transform;
             
-            var found = root.GetComponentsInChildren<Transform>(true)
-                .FirstOrDefault(t => t.CompareTag(spawnPointTag));  // 【修复】改为大写 F
+            Transform found = root.GetComponentsInChildren<Transform>(true)
+                .FirstOrDefault(t => t.CompareTag(spawnPointTag));
             
-            if (found != null) return found;
+            if (found != null) 
+                return found;
         }
+        
         return null;
-    }
-
-    private void MoveXROriginToPoint(Transform targetPoint)
-    {
-        if (xrOrigin == null || targetPoint == null) return;
-
-        CharacterController charCtrl = xrOrigin.GetComponent<CharacterController>();
-        bool wasEnabled = false;
-        
-        if (charCtrl != null && charCtrl.enabled)
-        {
-            wasEnabled = true;
-            charCtrl.enabled = false;
-        }
-
-        var xrOriginComp = xrOrigin.GetComponent<XROrigin>();
-        if (xrOriginComp != null)
-        {
-            xrOriginComp.MoveCameraToWorldLocation(targetPoint.position);
-        }
-        else
-        {
-            xrOrigin.position = targetPoint.position;
-        }
-        
-        xrOrigin.rotation = targetPoint.rotation;
-
-        if (wasEnabled && charCtrl != null)
-            charCtrl.enabled = true;
     }
 
     private bool IsSceneLoaded(string sceneName) => 

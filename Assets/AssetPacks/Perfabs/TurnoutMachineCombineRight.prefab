@@ -2894,6 +2894,11 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 635295164820918417, guid: 8e762efaac6ac36478c60e5d6318d042,
         type: 3}
+      propertyPath: m_MaxAngle
+      value: 4096
+      objectReference: {fileID: 0}
+    - target: {fileID: 635295164820918417, guid: 8e762efaac6ac36478c60e5d6318d042,
+        type: 3}
       propertyPath: m_InteractionLayers.m_Bits
       value: 2
       objectReference: {fileID: 0}

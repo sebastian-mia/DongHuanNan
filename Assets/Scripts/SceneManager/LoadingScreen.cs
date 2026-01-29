@@ -14,13 +14,14 @@ public class LoadingScreen : MonoBehaviour
     [SerializeField] private float maxBarWidth = 400f;
     [SerializeField] private float smoothSpeed = 5f;
 
-    [Header("位置设置")] [SerializeField] private Transform target; // XROrigin 引用
-    [SerializeField] private float distance = 2f; // 前方 2m
+    [Header("位置设置")] 
+    [SerializeField] private float distance = 5f; // 前方 5m
     [SerializeField] private float heightOffset = 2f; // Y轴相对偏移 2m
 
     private float currentDisplayProgress = 0f;
     private float targetProgress = 0f;
     private bool isVisible = false;
+    private Transform currentTarget; // 当前跟随的target
 
     void Awake()
     {
@@ -51,30 +52,79 @@ public class LoadingScreen : MonoBehaviour
         if (progressText == null)
             progressText = GetComponentInChildren<TextMeshProUGUI>(true);
 
-        FindTarget();
+        // 【事件订阅】订阅XROrigin变化事件
+        VRSceneManager.OnXROriginChanged += OnXROriginChanged;
+        
+        // 初始查找
+        FindAndSetTarget();
     }
 
-    void FindTarget()
+    void OnDestroy()
     {
-        if (target == null)
+        // 【事件取消订阅】防止内存泄漏
+        VRSceneManager.OnXROriginChanged -= OnXROriginChanged;
+    }
+
+    // 【事件处理】XROrigin变化时更新位置
+    private void OnXROriginChanged(Transform newXROrigin)
+    {
+        if (newXROrigin != null)
+        {
+            currentTarget = newXROrigin;
+            Debug.Log($"[LoadingScreen] 收到XROrigin变化事件: {newXROrigin.name}");
+            
+            // 如果正在显示，立即更新位置
+            if (isVisible)
+            {
+                UpdatePosition();
+            }
+        }
+    }
+
+    void FindAndSetTarget()
+    {
+        if (currentTarget == null)
         {
             var xro = FindObjectOfType<XROrigin>();
             if (xro != null)
-                target = xro.transform;
-            else
-                Debug.LogWarning("LoadingScreen: 未找到 XROrigin");
+                currentTarget = xro.transform;
         }
     }
 
     void Update()
     {
-        // 只在可见时更新进度条动画（位置不每帧更新）
         if (!isVisible) return;
+
+        // 每帧更新位置（确保跟随XROrigin移动）
+        if (currentTarget != null)
+        {
+            UpdatePosition();
+        }
 
         if (Mathf.Abs(currentDisplayProgress - targetProgress) > 0.001f)
         {
             currentDisplayProgress = Mathf.Lerp(currentDisplayProgress, targetProgress, Time.deltaTime * smoothSpeed);
             UpdateVisuals(currentDisplayProgress);
+        }
+    }
+
+    private void UpdatePosition()
+    {
+        if (currentTarget == null) return;
+
+        // 位置：前方 2m，高度相对 +2m
+        Vector3 targetPosition = currentTarget.position + currentTarget.forward * distance;
+        targetPosition.y = currentTarget.position.y + heightOffset;
+        transform.position = targetPosition;
+
+        // 面向玩家
+        Vector3 direction = transform.position - currentTarget.position;
+        direction.y = 0;
+
+        if (direction != Vector3.zero)
+        {
+            Quaternion lookRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
         }
     }
 
@@ -107,25 +157,13 @@ public class LoadingScreen : MonoBehaviour
         gameObject.SetActive(true);
         isVisible = true;
 
-        FindTarget();
+        // 确保有target
+        FindAndSetTarget();
 
-        if (target != null)
+        // 立即更新位置
+        if (currentTarget != null)
         {
-            // 位置：前方 2m，高度相对 +2m
-            Vector3 targetPosition = target.position + target.forward * distance;
-            targetPosition.y = target.position.y + heightOffset;
-            transform.position = targetPosition;
-
-            // 【修正背向问题】计算从 XROrigin 指向 UI 的方向（即 UI 应该面向的反向）
-            Vector3 direction = transform.position - target.position; // 从玩家指向UI
-            direction.y = 0; // 保持水平
-
-            if (direction != Vector3.zero)
-            {
-                Quaternion lookRotation = Quaternion.LookRotation(direction);
-                // 只取 Y 轴，确保 UI 平面正对玩家
-                transform.rotation = Quaternion.Euler(0, lookRotation.eulerAngles.y, 0);
-            }
+            UpdatePosition();
         }
 
         // 直接显示（无淡入动画）
@@ -144,9 +182,6 @@ public class LoadingScreen : MonoBehaviour
         UpdateVisuals(0f);
     }
 
-    /// <summary>
-    /// 直接隐藏（无动画）
-    /// </summary>
     public void HideImmediate()
     {
         isVisible = false;
