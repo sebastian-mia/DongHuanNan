@@ -76,7 +76,7 @@ GameObject:
   - component: {fileID: 2865579662338559742}
   m_Layer: 0
   m_Name: Left Controller
-  m_TagString: Untagged
+  m_TagString: LeftController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3056,10 +3056,9 @@ GameObject:
   - component: {fileID: 1519733842650422765}
   - component: {fileID: 6307492981976580184}
   - component: {fileID: 8768384413141507015}
-  - component: {fileID: 1485814983326975992}
   m_Layer: 0
   m_Name: Right Controller
-  m_TagString: Untagged
+  m_TagString: RightController
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3394,21 +3393,6 @@ MonoBehaviour:
   - groupMember: {fileID: 3562812533826952635}
     overrideGroupMembers:
     - {fileID: 7344004727731000696}
---- !u!114 &1485814983326975992
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5958148222415906266}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 39408d0fdd150a34483f471f92140024, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  inputDeviceCharacteristics: 512
-  pokeAttachTransform: {fileID: 0}
-  directAttachTransform: {fileID: 0}
 --- !u!1 &6007647931812738302
 GameObject:
   m_ObjectHideFlags: 0

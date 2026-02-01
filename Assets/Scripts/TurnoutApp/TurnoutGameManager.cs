@@ -43,11 +43,12 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
     private void CreateTargetRoute()
     {
-        randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
+        // randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
+        randomNum = 1;
         var targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至福庆北路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至盛莫路下行进路";
             this.SendCommand<PerpareDownSideToDownSideRouteCommand>();
         }
 

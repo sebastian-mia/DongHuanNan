@@ -14,8 +14,8 @@ public class JudgeRouteCommand : AbstractCommand
 
         foreach (var key in keys)
         {
-            if (this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].TurnoutState ==
-                this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].TurnoutState)
+            if (this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].TurnoutState ==
+                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].TurnoutState)
             {
                 correctCount++;
             }
@@ -25,6 +25,5 @@ public class JudgeRouteCommand : AbstractCommand
         {
             this.GetModel<TurnoutModel>().isCorrectRoute.Value = true;
         }
-        
     }
 }

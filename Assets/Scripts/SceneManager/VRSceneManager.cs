@@ -34,10 +34,21 @@ public class VRSceneManager : MonoBehaviour
     [SerializeField] private float fadeInDuration = 0.8f;     
     [SerializeField] private int blackScreenFrames = 2;       
     
+    [Header("Controller Settings")]
+    [SerializeField] private string leftControllerTag = "LeftController";
+    [SerializeField] private string rightControllerTag = "RightController";
+    [SerializeField] private string waistSlotsTag = "WaistSlots";
+    
     private List<Scene> loadedScenes = new List<Scene>();
     private bool isLoading = false;
     private bool wasLocomotionEnabled = true;
     private bool isMovementRestricted = false;
+    
+    // 缓存控制器引用
+    private GameObject leftController;
+    private GameObject rightController;
+    private List<GameObject> waistSlots = new List<GameObject>();
+    private bool hasCachedObjects = false;
 
     public static event Action<Transform> OnXROriginChanged;
     
@@ -60,7 +71,128 @@ public class VRSceneManager : MonoBehaviour
 
         EnsureXROrigin();
         
+        // 尝试查找，但可能找不到（如果对象还没加载）
+        FindAndCacheAllObjects();
+        
         cameraFader?.SetTransparent();
+    }
+
+    void Start()
+    {
+        // Start 中再次尝试查找，此时 Persistent 场景的对象应该已经加载
+        if (!hasCachedObjects)
+        {
+            FindAndCacheAllObjects();
+        }
+    }
+
+    /// <summary>
+    /// 查找并缓存所有需要在加载时隐藏的对象
+    /// </summary>
+    private void FindAndCacheAllObjects()
+    {
+        bool foundAny = false;
+
+        // 查找左控制器
+        if (leftController == null && !string.IsNullOrEmpty(leftControllerTag))
+        {
+            GameObject[] leftControllers = GameObject.FindGameObjectsWithTag(leftControllerTag);
+            if (leftControllers.Length > 0)
+            {
+                leftController = leftControllers[0];
+                foundAny = true;
+                Debug.Log($"[VRSceneManager] 缓存左控制器: {leftController.name}");
+            }
+        }
+
+        // 查找右控制器
+        if (rightController == null && !string.IsNullOrEmpty(rightControllerTag))
+        {
+            GameObject[] rightControllers = GameObject.FindGameObjectsWithTag(rightControllerTag);
+            if (rightControllers.Length > 0)
+            {
+                rightController = rightControllers[0];
+                foundAny = true;
+                Debug.Log($"[VRSceneManager] 缓存右控制器: {rightController.name}");
+            }
+        }
+
+        // 查找所有WaistSlots（可能有多个）
+        if (waistSlots.Count == 0 && !string.IsNullOrEmpty(waistSlotsTag))
+        {
+            GameObject[] slots = GameObject.FindGameObjectsWithTag(waistSlotsTag);
+            if (slots.Length > 0)
+            {
+                waistSlots.Clear();
+                waistSlots.AddRange(slots);
+                foundAny = true;
+                Debug.Log($"[VRSceneManager] 缓存了 {waistSlots.Count} 个WaistSlots (Tag: {waistSlotsTag})");
+            }
+        }
+
+        if (foundAny)
+        {
+            hasCachedObjects = true;
+        }
+    }
+
+    /// <summary>
+    /// 确保缓存已初始化，如果没有则尝试查找
+    /// </summary>
+    private void EnsureCacheInitialized()
+    {
+        if (!hasCachedObjects || (leftController == null && rightController == null && waistSlots.Count == 0))
+        {
+            Debug.Log("[VRSceneManager] 缓存未初始化或已失效，重新查找...");
+            FindAndCacheAllObjects();
+        }
+    }
+
+    /// <summary>
+    /// 设置所有控制器和WaistSlots的显示状态
+    /// </summary>
+    private void SetControllersAndSlotsVisible(bool visible)
+    {
+        // 确保缓存已初始化
+        EnsureCacheInitialized();
+
+        // 设置左控制器
+        if (leftController != null)
+        {
+            leftController.SetActive(visible);
+            Debug.Log($"[VRSceneManager] 左控制器 {(visible ? "显示" : "隐藏")}");
+        }
+        else
+        {
+            Debug.LogWarning("[VRSceneManager] 左控制器引用为null");
+        }
+
+        // 设置右控制器
+        if (rightController != null)
+        {
+            rightController.SetActive(visible);
+            Debug.Log($"[VRSceneManager] 右控制器 {(visible ? "显示" : "隐藏")}");
+        }
+        else
+        {
+            Debug.LogWarning("[VRSceneManager] 右控制器引用为null");
+        }
+
+        // 设置所有WaistSlots
+        int processedCount = 0;
+        foreach (var slot in waistSlots)
+        {
+            if (slot != null)
+            {
+                slot.SetActive(visible);
+                processedCount++;
+            }
+        }
+        
+        if (waistSlots.Count > 0)
+        {
+            Debug.Log($"[VRSceneManager] {processedCount}/{waistSlots.Count} 个WaistSlots {(visible ? "显示" : "隐藏")}");
+        }
     }
 
     public async Task LoadSceneAsync(string sceneName, bool setActive = true, bool showLoading = true)
@@ -70,10 +202,12 @@ public class VRSceneManager : MonoBehaviour
 
         isLoading = true;
 
+        // 隐藏控制器和WaistSlots
+        SetControllersAndSlotsVisible(false);
+
         if (disableMovementDuringLoading)
         {
             SetLocomotionEnabled(false);
-            SetInteractionsEnabled(false);
         }
 
         try
@@ -164,17 +298,19 @@ public class VRSceneManager : MonoBehaviour
         finally
         {
             isLoading = false;
+            
+            // 显示控制器和WaistSlots
+            SetControllersAndSlotsVisible(true);
+            
             if (disableMovementDuringLoading)
             {
                 if (isMovementRestricted)
                 {
-                    SetInteractionsEnabled(true);
-                    Debug.Log("[VRSceneManager] 加载完成，MenuScene 中移动受限但交互可用");
+                    Debug.Log("[VRSceneManager] 加载完成，MenuScene 中移动受限");
                 }
                 else
                 {
                     SetLocomotionEnabled(true);
-                    SetInteractionsEnabled(true);
                 }
             }
         }
@@ -185,8 +321,10 @@ public class VRSceneManager : MonoBehaviour
         if (isLoading) return;
         isLoading = true;
 
+        // 隐藏控制器和WaistSlots
+        SetControllersAndSlotsVisible(false);
+        
         SetLocomotionEnabled(false);
-        SetInteractionsEnabled(false);
 
         try
         {
@@ -279,15 +417,17 @@ public class VRSceneManager : MonoBehaviour
         finally
         {
             isLoading = false;
+            
+            // 显示控制器和WaistSlots
+            SetControllersAndSlotsVisible(true);
+            
             if (isMovementRestricted)
             {
-                SetInteractionsEnabled(true);
                 SetLocomotionEnabled(false);
             }
             else
             {
                 SetLocomotionEnabled(true);
-                SetInteractionsEnabled(true);
             }
         }
     }
@@ -432,9 +572,8 @@ public class VRSceneManager : MonoBehaviour
     {
         if (autoRestrictInMenu && restrictMovementScenes.Contains(sceneName))
         {
-            Debug.Log($"[VRSceneManager] {sceneName} 中限制移动，但允许交互");
+            Debug.Log($"[VRSceneManager] {sceneName} 中限制移动");
             SetLocomotionEnabled(false);
-            SetInteractionsEnabled(true);
             isMovementRestricted = true;
         }
         else
@@ -457,7 +596,6 @@ public class VRSceneManager : MonoBehaviour
     {
         Debug.Log("[VRSceneManager] 强制限制移动");
         SetLocomotionEnabled(false);
-        SetInteractionsEnabled(true);
         isMovementRestricted = true;
     }
 
@@ -491,21 +629,6 @@ public class VRSceneManager : MonoBehaviour
         else
         {
             locomotionSystem.enabled = wasLocomotionEnabled;
-        }
-    }
-
-    private void SetInteractionsEnabled(bool enabled)
-    {
-        var rayInteractors = FindObjectsOfType<XRRayInteractor>(true);
-        foreach (var interactor in rayInteractors)
-        {
-            interactor.enabled = enabled;
-        }
-        
-        var directInteractors = FindObjectsOfType<XRDirectInteractor>(true);
-        foreach (var interactor in directInteractors)
-        {
-            interactor.enabled = enabled;
         }
     }
 
