@@ -44,11 +44,15 @@ public class VRSceneManager : MonoBehaviour
     private bool wasLocomotionEnabled = true;
     private bool isMovementRestricted = false;
     
-    // 缓存控制器引用
     private GameObject leftController;
     private GameObject rightController;
-    private List<GameObject> waistSlots = new List<GameObject>();
+    private GameObject waistSlots;
     private bool hasCachedObjects = false;
+
+    // 缩放恢复用的原始值缓存
+    private Vector3 leftControllerOriginalScale = Vector3.one;
+    private Vector3 rightControllerOriginalScale = Vector3.one;
+    private Vector3 waistSlotsOriginalScale = Vector3.one;
 
     public static event Action<Transform> OnXROriginChanged;
     
@@ -71,7 +75,6 @@ public class VRSceneManager : MonoBehaviour
 
         EnsureXROrigin();
         
-        // 尝试查找，但可能找不到（如果对象还没加载）
         FindAndCacheAllObjects();
         
         cameraFader?.SetTransparent();
@@ -79,54 +82,49 @@ public class VRSceneManager : MonoBehaviour
 
     void Start()
     {
-        // Start 中再次尝试查找，此时 Persistent 场景的对象应该已经加载
         if (!hasCachedObjects)
         {
             FindAndCacheAllObjects();
         }
     }
 
-    /// <summary>
-    /// 查找并缓存所有需要在加载时隐藏的对象
-    /// </summary>
     private void FindAndCacheAllObjects()
     {
         bool foundAny = false;
 
-        // 查找左控制器
         if (leftController == null && !string.IsNullOrEmpty(leftControllerTag))
         {
             GameObject[] leftControllers = GameObject.FindGameObjectsWithTag(leftControllerTag);
             if (leftControllers.Length > 0)
             {
                 leftController = leftControllers[0];
+                leftControllerOriginalScale = leftController.transform.localScale;
                 foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存左控制器: {leftController.name}");
+                Debug.Log($"[VRSceneManager] 缓存左控制器: {leftController.name}, 原始缩放: {leftControllerOriginalScale}");
             }
         }
 
-        // 查找右控制器
         if (rightController == null && !string.IsNullOrEmpty(rightControllerTag))
         {
             GameObject[] rightControllers = GameObject.FindGameObjectsWithTag(rightControllerTag);
             if (rightControllers.Length > 0)
             {
                 rightController = rightControllers[0];
+                rightControllerOriginalScale = rightController.transform.localScale;
                 foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存右控制器: {rightController.name}");
+                Debug.Log($"[VRSceneManager] 缓存右控制器: {rightController.name}, 原始缩放: {rightControllerOriginalScale}");
             }
         }
 
-        // 查找所有WaistSlots（可能有多个）
-        if (waistSlots.Count == 0 && !string.IsNullOrEmpty(waistSlotsTag))
+        if (waistSlots == null && !string.IsNullOrEmpty(waistSlotsTag))
         {
             GameObject[] slots = GameObject.FindGameObjectsWithTag(waistSlotsTag);
             if (slots.Length > 0)
             {
-                waistSlots.Clear();
-                waistSlots.AddRange(slots);
+                waistSlots = slots[0];
+                waistSlotsOriginalScale = waistSlots.transform.localScale;
                 foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存了 {waistSlots.Count} 个WaistSlots (Tag: {waistSlotsTag})");
+                Debug.Log($"[VRSceneManager] 缓存WaistSlots: {waistSlots.name}, 原始缩放: {waistSlotsOriginalScale}");
             }
         }
 
@@ -136,12 +134,9 @@ public class VRSceneManager : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// 确保缓存已初始化，如果没有则尝试查找
-    /// </summary>
     private void EnsureCacheInitialized()
     {
-        if (!hasCachedObjects || (leftController == null && rightController == null && waistSlots.Count == 0))
+        if (!hasCachedObjects || (leftController == null && rightController == null && waistSlots == null))
         {
             Debug.Log("[VRSceneManager] 缓存未初始化或已失效，重新查找...");
             FindAndCacheAllObjects();
@@ -149,49 +144,31 @@ public class VRSceneManager : MonoBehaviour
     }
 
     /// <summary>
-    /// 设置所有控制器和WaistSlots的显示状态
+    /// 设置所有控制器和WaistSlots的缩放（0=隐藏/不可交互，1=显示/可交互）
     /// </summary>
     private void SetControllersAndSlotsVisible(bool visible)
     {
-        // 确保缓存已初始化
         EnsureCacheInitialized();
 
-        // 设置左控制器
+        // 左控制器
         if (leftController != null)
         {
-            leftController.SetActive(visible);
-            Debug.Log($"[VRSceneManager] 左控制器 {(visible ? "显示" : "隐藏")}");
-        }
-        else
-        {
-            Debug.LogWarning("[VRSceneManager] 左控制器引用为null");
+            leftController.transform.localScale = visible ? leftControllerOriginalScale : Vector3.zero;
+            Debug.Log($"[VRSceneManager] 左控制器 {(visible ? "显示" : "隐藏")} (缩放: {(visible ? leftControllerOriginalScale : Vector3.zero)})");
         }
 
-        // 设置右控制器
+        // 右控制器
         if (rightController != null)
         {
-            rightController.SetActive(visible);
+            rightController.transform.localScale = visible ? rightControllerOriginalScale : Vector3.zero;
             Debug.Log($"[VRSceneManager] 右控制器 {(visible ? "显示" : "隐藏")}");
         }
-        else
-        {
-            Debug.LogWarning("[VRSceneManager] 右控制器引用为null");
-        }
 
-        // 设置所有WaistSlots
-        int processedCount = 0;
-        foreach (var slot in waistSlots)
+        // WaistSlots
+        if (waistSlots != null)
         {
-            if (slot != null)
-            {
-                slot.SetActive(visible);
-                processedCount++;
-            }
-        }
-        
-        if (waistSlots.Count > 0)
-        {
-            Debug.Log($"[VRSceneManager] {processedCount}/{waistSlots.Count} 个WaistSlots {(visible ? "显示" : "隐藏")}");
+            waistSlots.transform.localScale = visible ? waistSlotsOriginalScale : Vector3.zero;
+            Debug.Log($"[VRSceneManager] WaistSlots {(visible ? "显示" : "隐藏")} (缩放: {(visible ? waistSlotsOriginalScale : Vector3.zero)})");
         }
     }
 
@@ -202,7 +179,6 @@ public class VRSceneManager : MonoBehaviour
 
         isLoading = true;
 
-        // 隐藏控制器和WaistSlots
         SetControllersAndSlotsVisible(false);
 
         if (disableMovementDuringLoading)
@@ -299,7 +275,6 @@ public class VRSceneManager : MonoBehaviour
         {
             isLoading = false;
             
-            // 显示控制器和WaistSlots
             SetControllersAndSlotsVisible(true);
             
             if (disableMovementDuringLoading)
@@ -321,7 +296,6 @@ public class VRSceneManager : MonoBehaviour
         if (isLoading) return;
         isLoading = true;
 
-        // 隐藏控制器和WaistSlots
         SetControllersAndSlotsVisible(false);
         
         SetLocomotionEnabled(false);
@@ -418,7 +392,6 @@ public class VRSceneManager : MonoBehaviour
         {
             isLoading = false;
             
-            // 显示控制器和WaistSlots
             SetControllersAndSlotsVisible(true);
             
             if (isMovementRestricted)
@@ -466,46 +439,37 @@ public class VRSceneManager : MonoBehaviour
 
         Debug.Log($"[VRSceneManager] 协程开始: 当前XROrigin位置={xrOrigin.position}, 本地={xrOrigin.localPosition}, 目标={targetPoint.position}");
 
-        // 第1步: 禁用所有可能干扰位置的组件
         if (charCtrl != null) charCtrl.enabled = false;
         if (xrOriginComp != null) xrOriginComp.enabled = false;
 
         yield return null;
 
-        // 第2步: 【关键】强制重置XROrigin本地变换为绝对零（解决MenuScene偏移问题）
         xrOrigin.localPosition = Vector3.zero;
         xrOrigin.localRotation = Quaternion.identity;
         xrOrigin.localScale = Vector3.one;
         
-        // 强制刷新
         xrOrigin.GetComponent<Transform>();
         
         yield return null;
         
         Debug.Log($"[VRSceneManager] 重置本地变换后: XROrigin世界={xrOrigin.position}, 本地={xrOrigin.localPosition}");
 
-        // 第3步: 【关键】计算父物体应该的位置，使得XROrigin世界位置等于targetPoint
         if (xrSetup != null)
         {
-            // 父物体位置 = 目标位置 - XROrigin本地位置（应该是零）
-            // 但为了保险，还是计算一下
             Vector3 setupTargetPos = targetPoint.position - xrOrigin.localPosition;
             xrSetup.position = setupTargetPos;
             xrSetup.rotation = targetPoint.rotation;
             
-            // 强制刷新
             xrSetup.GetComponent<Transform>();
             
             yield return null;
             
             Debug.Log($"[VRSceneManager] 移动父物体后: 父物体={xrSetup.position}, XROrigin={xrOrigin.position}");
             
-            // 第4步: 【保险】如果还有偏差，直接强制设置
             if (Vector3.Distance(xrOrigin.position, targetPoint.position) > 0.01f)
             {
                 Debug.LogWarning($"[VRSceneManager] 位置有偏差，强制修正: {Vector3.Distance(xrOrigin.position, targetPoint.position)}");
                 
-                // 重新计算父物体位置
                 xrSetup.position = targetPoint.position - xrOrigin.localPosition;
                 xrSetup.GetComponent<Transform>();
                 
@@ -514,7 +478,6 @@ public class VRSceneManager : MonoBehaviour
         }
         else
         {
-            // 没有父物体，直接移动
             xrOrigin.position = targetPoint.position;
             xrOrigin.rotation = targetPoint.rotation;
             
@@ -523,11 +486,9 @@ public class VRSceneManager : MonoBehaviour
             Debug.Log($"[VRSceneManager] 直接移动XROrigin到: {xrOrigin.position}");
         }
 
-        // 第5步: 强制同步物理系统
         Physics.SyncTransforms();
         yield return null;
 
-        // 第6步: 重新启用组件
         if (xrOriginComp != null) xrOriginComp.enabled = true;
         
         if (charCtrl != null) 
