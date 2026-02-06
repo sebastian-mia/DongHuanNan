@@ -18,7 +18,9 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private XRSocketInteractor handlerSocketInteractor;
     private XRSocketInteractor turnoutLockNormalSocketInteractor;
     private XRSocketInteractor turnoutLockReverseSocketInteractor;
+    private XRSocketInteractor turnoutCutPowerSocketInteractor;
     private readonly string turnoutMachineSocketTag = "TurnoutMachineSocket";
+    private readonly string turnoutCutPowerSocketTag = "CutPowerSocket";
 
 
     private XRKnob xRKnob;
@@ -66,21 +68,17 @@ public class TurnoutMachineController : MonoBehaviour, IController
             xRKnob.onValueChange.AddListener(EnableHandler);
         }
 
-        //绑定事件
-        this.RegisterEvent<CutPowerEvent>(e =>
-        {
-            if (e.turnoutID == turnoutID)
-            {
-                PlayCutPowerAnimator();
-            }
-        });
-
         var xRSocketInteractors = GetComponentsInChildren<XRSocketInteractor>();
         for (int i = 0; i < xRSocketInteractors.Length; i++)
         {
             if (xRSocketInteractors[i].CompareTag(turnoutMachineSocketTag))
             {
                 handlerSocketInteractor = xRSocketInteractors[i];
+            }
+
+            if (xRSocketInteractors[i].CompareTag(turnoutCutPowerSocketTag))
+            {
+                turnoutCutPowerSocketInteractor = xRSocketInteractors[i];
             }
 
             if (xRSocketInteractors[i].CompareTag(turnoutNormalSideTag))
@@ -110,10 +108,22 @@ public class TurnoutMachineController : MonoBehaviour, IController
             turnoutLockReverseSocketInteractor.selectEntered.AddListener(LockTurnout);
         }
 
+        if (turnoutCutPowerSocketInteractor != null)
+        {
+            turnoutCutPowerSocketInteractor.selectEntered.AddListener(TurnoutMachineCutPower);
+        }
+
         animator = GetComponent<Animator>();
 
         //QFramework
         turnoutModel = this.GetModel<TurnoutModel>();
+    }
+
+    private void TurnoutMachineCutPower(SelectEnterEventArgs args)
+    {
+        PlayCutPowerAnimator();
+        this.SendCommand<CutPowerCommand>(new CutPowerCommand(turnoutID));
+        turnoutCutPowerSocketInteractor.enabled = false;
     }
 
     private void GetHandlerInteractables(SelectEnterEventArgs args)
