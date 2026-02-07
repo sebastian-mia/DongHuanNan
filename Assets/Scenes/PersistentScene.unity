@@ -839,6 +839,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ghostPrefab: {fileID: 0}
+  delayTime: 0
   homeSocket: {fileID: 0}
 --- !u!1001 &1462790662
 PrefabInstance:
@@ -1082,6 +1083,11 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 2143705998574322260, guid: a0c0da490458b5745923a86908f2c91b,
+        type: 3}
+      propertyPath: delayTime
+      value: 0.5
+      objectReference: {fileID: 0}
     - target: {fileID: 2596089430988353455, guid: a0c0da490458b5745923a86908f2c91b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1166,6 +1172,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
       value: -270
+      objectReference: {fileID: 0}
+    - target: {fileID: 5784783619245717658, guid: a0c0da490458b5745923a86908f2c91b,
+        type: 3}
+      propertyPath: delayTime
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6174419260686644007, guid: a0c0da490458b5745923a86908f2c91b,
         type: 3}

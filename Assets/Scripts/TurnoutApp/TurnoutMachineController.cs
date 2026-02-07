@@ -121,9 +121,9 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void TurnoutMachineCutPower(SelectEnterEventArgs args)
     {
+        turnoutCutPowerSocketInteractor.enabled = false;
         PlayCutPowerAnimator();
         this.SendCommand<CutPowerCommand>(new CutPowerCommand(turnoutID));
-        turnoutCutPowerSocketInteractor.enabled = false;
     }
 
     private void GetHandlerInteractables(SelectEnterEventArgs args)

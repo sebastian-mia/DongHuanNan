@@ -22,10 +22,10 @@ public class TurnoutMachineUIController : MonoBehaviour
             }
         }
 
-        if (handlerSocketInteractor == null)
+        if (handlerSocketInteractor != null)
         {
-            handlerSocketInteractor.selectEntered.AddListener(ShowUseHandlerTag);
-            handlerSocketInteractor.selectExited.AddListener(ShowRotateTag);
+            handlerSocketInteractor.selectEntered.AddListener(ShowRotateTag);
+            handlerSocketInteractor.selectExited.AddListener(ShowUseHandlerTag);
         }
 
         turnoutMachineUI = UIManager.Instance.ShowUI(ChooseUIByID()).GetComponent<TurnoutMachineUI>();
@@ -53,13 +53,14 @@ public class TurnoutMachineUIController : MonoBehaviour
         return null;
     }
 
-    private void ShowUseHandlerTag(SelectEnterEventArgs args)
+    private void ShowUseHandlerTag(SelectExitEventArgs args)
     {
-        turnoutMachineUI.handlerTag.text = "插入手摇把";
+        turnoutMachineUI.handlerTag.SetText("插入手摇把");
     }
 
-    private void ShowRotateTag(SelectExitEventArgs args)
+    private void ShowRotateTag(SelectEnterEventArgs args)
     {
-        turnoutMachineUI.handlerTag.text = "转动";
+        Debug.Log(turnoutID + "转动");
+        turnoutMachineUI.handlerTag.SetText("转动");
     }
 }

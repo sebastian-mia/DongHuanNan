@@ -6,9 +6,9 @@ using System.Linq;
 [RequireComponent(typeof(XRGrabInteractable))]
 public class WaistSlotItem : MonoBehaviour
 {
-    [Header("回家提示（可选）")]
-    public GameObject ghostPrefab;
+    [Header("回家提示（可选）")] public GameObject ghostPrefab;
     private GameObject ghostInst;
+    public float delayTime = 1f;
 
     [HideInInspector] public XRSocketInteractor homeSocket;
     private XRGrabInteractable grab;
@@ -18,7 +18,7 @@ public class WaistSlotItem : MonoBehaviour
     void Start()
     {
         grab = GetComponent<XRGrabInteractable>();
-        rb   = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
 
         // 旧版兼容：记录运行前已插好的槽
         var selecting = grab.interactorsSelecting;
@@ -26,7 +26,7 @@ public class WaistSlotItem : MonoBehaviour
             homeSocket = s;
 
         grab.selectEntered.AddListener(OnGrab);
-        grab.selectExited .AddListener(OnRelease);
+        grab.selectExited.AddListener(OnRelease);
     }
 
     public void SetHome(XRSocketInteractor socket)
@@ -40,7 +40,7 @@ public class WaistSlotItem : MonoBehaviour
         if (args.interactorObject is XRDirectInteractor)
         {
             rb.isKinematic = true;
-            rb.useGravity  = false;
+            rb.useGravity = false;
             StopAllCoroutines();
             isReturning = false;
             HideGhost();
@@ -56,7 +56,7 @@ public class WaistSlotItem : MonoBehaviour
         if (args.interactorObject is XRDirectInteractor)
         {
             rb.isKinematic = false;
-            rb.useGravity  = true;
+            rb.useGravity = true;
 
             // 🔥1秒后再判断
             StartCoroutine(DelayedDecide());
@@ -66,10 +66,10 @@ public class WaistSlotItem : MonoBehaviour
     /* 新增1秒延迟 */
     private IEnumerator DelayedDecide()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(delayTime);
         // 下面完全复用你原来的逻辑
         var captor = FindObjectsOfType<XRSocketInteractor>()
-                     .FirstOrDefault(s => s.selectTarget == grab);
+            .FirstOrDefault(s => s.selectTarget == grab);
 
         if (captor == null)
         {
@@ -93,19 +93,19 @@ public class WaistSlotItem : MonoBehaviour
         if (!homeSocket) yield break;
 
         // 冻结物理
-        rb.velocity        = Vector3.zero;
+        rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
-        rb.isKinematic     = true;
-        rb.useGravity      = false;
+        rb.isKinematic = true;
+        rb.useGravity = false;
 
         // 瞬移到槽口
         transform.SetPositionAndRotation(homeSocket.attachTransform.position,
-                                         homeSocket.attachTransform.rotation);
+            homeSocket.attachTransform.rotation);
 
         // 强制 socket 重新抓取
         homeSocket.enabled = true;
-        grab.enabled       = false;
-        grab.enabled       = true;
+        grab.enabled = false;
+        grab.enabled = true;
         homeSocket.StartManualInteraction(grab);
 
         yield return new WaitUntil(() => homeSocket.selectTarget == grab);
@@ -117,17 +117,19 @@ public class WaistSlotItem : MonoBehaviour
         if (ghostInst == null)
         {
             ghostInst = Instantiate(ghostPrefab,
-                                    homeSocket.attachTransform.position,
-                                    homeSocket.attachTransform.rotation);
+                homeSocket.attachTransform.position,
+                homeSocket.attachTransform.rotation);
         }
         else
         {
             ghostInst.SetActive(true);
             ghostInst.transform.SetPositionAndRotation(homeSocket.attachTransform.position,
-                                                       homeSocket.attachTransform.rotation);
+                homeSocket.attachTransform.rotation);
         }
+
         CancelInvoke(nameof(HideGhost));
         Invoke(nameof(HideGhost), 1.5f);
     }
+
     private void HideGhost() => ghostInst?.SetActive(false);
 }
