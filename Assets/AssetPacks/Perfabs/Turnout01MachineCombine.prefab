@@ -2985,6 +2985,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TurnoutLockNormal Socket Interactor
       objectReference: {fileID: 0}
+    - target: {fileID: 6300989187996104648, guid: 20af3728fc9d2e84c8648c1c222d6fb2,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 85
+      objectReference: {fileID: 0}
     - target: {fileID: 8733842515435414451, guid: 20af3728fc9d2e84c8648c1c222d6fb2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3054,6 +3059,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 1809472386593472454}
     m_Modifications:
+    - target: {fileID: 1140657148994417672, guid: d462c23d988c7d243a22a31e7977d73b,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 85
+      objectReference: {fileID: 0}
     - target: {fileID: 2925994331754372029, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3133,6 +3143,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: TurnoutDirectionNormalTag
       objectReference: {fileID: 0}
+    - target: {fileID: 256187005540444459, guid: 1b4867a7fec3a6040b528e3895bfd018,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 85
+      objectReference: {fileID: 0}
     - target: {fileID: 7157338013236160659, guid: 1b4867a7fec3a6040b528e3895bfd018,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -3206,6 +3221,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TurnoutDirectionReveresTag
+      objectReference: {fileID: 0}
+    - target: {fileID: 4532257164957242485, guid: 95383d611e588d640a1635e0fa6d43d1,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 85
       objectReference: {fileID: 0}
     - target: {fileID: 6311150283881025093, guid: 95383d611e588d640a1635e0fa6d43d1,
         type: 3}

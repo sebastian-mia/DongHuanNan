@@ -26,6 +26,21 @@ public enum TurnoutID
     Turnout06,
 }
 
+public enum RedLightPosition
+{
+    下行,
+    上行,
+    折返线1道,
+    折返线2道
+}
+
+public enum RouteNodeTag
+{
+    道岔,
+    红闪灯,
+    钩锁器
+}
+
 public enum LineName
 {
     一号线,

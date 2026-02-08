@@ -8,12 +8,13 @@ public class TurnoutModel : AbstractModel
     public int routeCount;
     public BindableProperty<Route> currentRoute = new BindableProperty<Route>();
     public BindableProperty<Route> targetRoute = new BindableProperty<Route>();
-    public BindableProperty<bool> isCorrectRoute = new BindableProperty<bool>();
+    public List<NodeValue> nodeValues = new List<NodeValue>();
+    public bool isCorrectRoute;
 
     protected override void OnInit()
     {
         routeCount = 10;
-        currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, false));
+        currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
             new TurnoutMachine(TurnoutID.Turnout01, LockedState.Nothing, false, TurnoutState.Normal));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout02,

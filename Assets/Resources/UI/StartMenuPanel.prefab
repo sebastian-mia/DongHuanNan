@@ -110,13 +110,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989,
         type: 2}
     - target: {fileID: 4301940395507214692, guid: 6be8e525138998241bd539313646eaa3,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1063295085924080692, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 5136924149688381332, guid: d37c6bfd2077d3c4290084924772724c,
         type: 2}
     - target: {fileID: 4301940395507214692, guid: 6be8e525138998241bd539313646eaa3,
         type: 3}
@@ -388,13 +388,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1063295085924080692, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 5136924149688381332, guid: d37c6bfd2077d3c4290084924772724c,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
@@ -552,13 +552,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1063295085924080692, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 5136924149688381332, guid: d37c6bfd2077d3c4290084924772724c,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
@@ -715,13 +715,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1063295085924080692, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 5136924149688381332, guid: d37c6bfd2077d3c4290084924772724c,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
@@ -884,13 +884,13 @@ PrefabInstance:
         type: 3}
       propertyPath: m_fontAsset
       value: 
-      objectReference: {fileID: 11400000, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: -1063295085924080692, guid: 891ba63367c13924698d43d581a39e02,
+      objectReference: {fileID: 5136924149688381332, guid: d37c6bfd2077d3c4290084924772724c,
         type: 2}
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
@@ -900,7 +900,7 @@ PrefabInstance:
     - target: {fileID: 5679610915397292254, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}
       propertyPath: m_hasFontAssetChanged
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5714899361274076821, guid: 89c7a51038aa77d4bb812e8adecde8d7,
         type: 3}

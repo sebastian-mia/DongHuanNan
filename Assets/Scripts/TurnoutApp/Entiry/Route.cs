@@ -6,12 +6,12 @@ public class Route
 {
     private TurnoutID startTurnoutID;
     public Dictionary<TurnoutID, TurnoutMachine> turnoutMachines = new Dictionary<TurnoutID, TurnoutMachine>();
-    public bool hasRedLight;
+    public RedLightPosition redLightPosition;
 
-    public Route(TurnoutID startTurnoutID, bool hasRedLight)
+    public Route(TurnoutID startTurnoutID, RedLightPosition redLightPosition)
     {
         this.startTurnoutID = startTurnoutID;
-        this.hasRedLight = hasRedLight;
+        this.redLightPosition = redLightPosition;
     }
 
     public TurnoutID StartTurnoutID
@@ -26,9 +26,9 @@ public class Route
         set => turnoutMachines = value;
     }
 
-    public bool HasRedLight
+    public RedLightPosition HasRedLight
     {
-        get => hasRedLight;
-        set => hasRedLight = value;
+        get => redLightPosition;
+        set => redLightPosition = value;
     }
 }
