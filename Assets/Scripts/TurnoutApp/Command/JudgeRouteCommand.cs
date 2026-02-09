@@ -6,55 +6,68 @@ using QFramework;
 public class JudgeRouteCommand : AbstractCommand
 {
     private int correctCount;
+    private RedLightPosition redLightPosition;
+
+    public JudgeRouteCommand(RedLightPosition redLightPosition)
+    {
+        this.redLightPosition = redLightPosition;
+    }
 
     protected override void OnExecute()
     {
+        var turnoutModel = this.GetModel<TurnoutModel>();
+        turnoutModel.currentRoute.Value.redLightPosition = redLightPosition;
         correctCount = 0;
-        var keys = this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Keys;
-
+        var keys = turnoutModel.targetRoute.Value.turnoutMachines.Keys;
+        var nodeRedLightValue = new NodeValue(RouteNodeTag.红闪灯.ToString(),
+            turnoutModel.targetRoute.Value.redLightPosition.ToString(),
+            turnoutModel.currentRoute.Value.redLightPosition.ToString(),
+            turnoutModel.currentRoute.Value.redLightPosition
+                .Equals(turnoutModel.targetRoute.Value.redLightPosition));
+        turnoutModel.nodeValues.Add(nodeRedLightValue);
         foreach (var key in keys)
         {
-            if (this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].TurnoutState ==
-                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].TurnoutState)
+            if (turnoutModel.targetRoute.Value.turnoutMachines[key].TurnoutState ==
+                turnoutModel.currentRoute.Value.turnoutMachines[key].TurnoutState)
             {
                 correctCount++;
             }
 
-            var nodeRedLightValue = new NodeValue("T0120" + key + "(" + RouteNodeTag.红闪灯 + ")",
-                this.GetModel<TurnoutModel>().targetRoute.Value.redLightPosition.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.redLightPosition.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.redLightPosition
-                    .Equals(this.GetModel<TurnoutModel>().targetRoute.Value.redLightPosition));
-            this.GetModel<TurnoutModel>().nodeValues.Add(nodeRedLightValue);
-            var nodeTurnoutValue = new NodeValue("T0120" + key + "(" + RouteNodeTag.道岔 + ")",
-                this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].TurnoutState.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].TurnoutState.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].TurnoutState
-                    .Equals(this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].TurnoutState));
-            this.GetModel<TurnoutModel>().nodeValues.Add(nodeTurnoutValue);
-            var nodeTurnoutLockValue = new NodeValue("T0120" + key + "(" + RouteNodeTag.钩锁器 + ")",
-                this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].LockedState.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].LockedState.ToString(),
-                this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[key].LockedState
-                    .Equals(this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines[key].LockedState));
-            this.GetModel<TurnoutModel>().nodeValues.Add(nodeTurnoutLockValue);
+            var nodeTurnoutValue = new NodeValue("T0120" + key.ToString().Substring(key.ToString().Length-2) + "(" + RouteNodeTag.道岔 + ")",
+                turnoutModel.targetRoute.Value.turnoutMachines[key].TurnoutState.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].TurnoutState.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].TurnoutState
+                    .Equals(turnoutModel.targetRoute.Value.turnoutMachines[key].TurnoutState));
+            turnoutModel.nodeValues.Add(nodeTurnoutValue);
+            var nodeTurnoutLockValue = new NodeValue("T0120" + key.ToString().Substring(key.ToString().Length-2) + "(" + RouteNodeTag.钩锁器 + ")",
+                turnoutModel.targetRoute.Value.turnoutMachines[key].LockedState.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].LockedState.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].LockedState
+                    .Equals(turnoutModel.targetRoute.Value.turnoutMachines[key].LockedState));
+            turnoutModel.nodeValues.Add(nodeTurnoutLockValue);
+            var cutPowerValue = new NodeValue("T0120" + key.ToString().Substring(key.ToString().Length-2) + "(" + RouteNodeTag.断电 + ")",
+                turnoutModel.targetRoute.Value.turnoutMachines[key].IsPowerCut.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].IsPowerCut.ToString(),
+                turnoutModel.currentRoute.Value.turnoutMachines[key].IsPowerCut
+                    .Equals(turnoutModel.targetRoute.Value.turnoutMachines[key].IsPowerCut));
+            turnoutModel.nodeValues.Add(cutPowerValue);
         }
 
-        Debug.Log("nodeValues:" + this.GetModel<TurnoutModel>().nodeValues.Count);
+        Debug.Log("nodeValues:" + turnoutModel.nodeValues.Count);
 
         // Debug.Log("currentRoute" + this.GetModel<TurnoutModel>().currentRoute.Value.redLightPosition);
         // Debug.Log("targetRoute" + this.GetModel<TurnoutModel>().targetRoute.Value.redLightPosition);
-        if (this.GetModel<TurnoutModel>().currentRoute.Value.redLightPosition
-            != this.GetModel<TurnoutModel>().targetRoute.Value.redLightPosition)
+        if (turnoutModel.currentRoute.Value.redLightPosition
+            != turnoutModel.targetRoute.Value.redLightPosition)
         {
-            this.GetModel<TurnoutModel>().isCorrectRoute = false;
+            turnoutModel.isCorrectRoute = false;
             this.SendEvent<ShowScorePanelEvent>();
             return;
         }
 
         if (correctCount == keys.Count)
         {
-            this.GetModel<TurnoutModel>().isCorrectRoute = true;
+            turnoutModel.isCorrectRoute = true;
             this.SendEvent<ShowScorePanelEvent>();
             return;
         }

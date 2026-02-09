@@ -6,6 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class RedLightSocketController : MonoBehaviour, IController
 {
+    public RedLightPosition redLightPosition;
     private XRSocketInteractor socketInteractor;
     private readonly string IEFlashLightTag = "FlashLight";
     private Renderer lightMeshRenderer;
@@ -30,7 +31,7 @@ public class RedLightSocketController : MonoBehaviour, IController
 
     private void CloseFlashLight(SelectExitEventArgs args)
     {
-        this.SendCommand<JudgeRouteCommand>();
+        this.SendCommand<JudgeRouteCommand>(new JudgeRouteCommand(redLightPosition));
         lightMeshRenderer = args.interactableObject.transform.GetChild(0).GetComponent<Renderer>();
         StopCoroutine(IEFlashLightTag);
         lightMeshRenderer.material.DisableKeyword(emissionTag);

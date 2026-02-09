@@ -14,6 +14,6 @@ public class ToggleTurnoutToReverseCommand : AbstractCommand
 
     protected override void OnExecute()
     {
-        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Reverse;
+        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.反位;
     }
 }

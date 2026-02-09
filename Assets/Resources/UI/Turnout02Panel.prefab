@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2686625234324930091}
   - component: {fileID: 1748068872100098354}
   - component: {fileID: 5161416859664555888}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -86,7 +86,7 @@ GameObject:
   - component: {fileID: 395312885262747366}
   - component: {fileID: 5912910371968046690}
   - component: {fileID: 2525784373375262384}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: HandlerTag (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -143,8 +143,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u63D2\u5165\u624B\u6447\u628A"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989, type: 2}
-  m_sharedMaterial: {fileID: 4010577586359184060, guid: 447532c7229b06a44a75734dd318f989,
+  m_fontAsset: {fileID: 11400000, guid: 6500f8331a8499641b7b389a1750d5dd, type: 2}
+  m_sharedMaterial: {fileID: -6830999895054859698, guid: 6500f8331a8499641b7b389a1750d5dd,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 8864311467011981040}
   - component: {fileID: 6022202071995386380}
   - component: {fileID: 8887612924722370937}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: CutPowerTag (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -279,8 +279,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u63D2\u5165\u8776\u5F62\u94A5\u5319"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989, type: 2}
-  m_sharedMaterial: {fileID: 4010577586359184060, guid: 447532c7229b06a44a75734dd318f989,
+  m_fontAsset: {fileID: 11400000, guid: 6500f8331a8499641b7b389a1750d5dd, type: 2}
+  m_sharedMaterial: {fileID: -6830999895054859698, guid: 6500f8331a8499641b7b389a1750d5dd,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -358,7 +358,7 @@ GameObject:
   - component: {fileID: 5522810329042388929}
   - component: {fileID: 2242873372555062708}
   - component: {fileID: 2065336711327109264}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -434,7 +434,7 @@ GameObject:
   - component: {fileID: 4116351941975606668}
   - component: {fileID: 5288202644012134216}
   - component: {fileID: 3800788100056094855}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Turnout02Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}

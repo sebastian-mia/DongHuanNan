@@ -6,10 +6,11 @@ public class TurnoutMachine
 {
     private TurnoutID turnoutID;
     private LockedState lockedState;
-    private bool isPowerCut;
+    private IsPowerCut isPowerCut;
     private TurnoutState turnoutState;
 
-    public TurnoutMachine(TurnoutID turnoutID, LockedState lockedState, bool isPowerCut, TurnoutState turnoutState)
+    public TurnoutMachine(TurnoutID turnoutID, LockedState lockedState, IsPowerCut isPowerCut,
+        TurnoutState turnoutState)
     {
         this.turnoutID = turnoutID;
         this.lockedState = lockedState;
@@ -29,7 +30,7 @@ public class TurnoutMachine
         set => lockedState = value;
     }
 
-    public bool IsPowerCut
+    public IsPowerCut IsPowerCut
     {
         get => isPowerCut;
         set => isPowerCut = value;

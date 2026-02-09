@@ -14,7 +14,7 @@ public class CutPowerCommand : AbstractCommand
 
     protected override void OnExecute()
     {
-        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut = true;
+        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut = IsPowerCut.已断电;
         var e = new CutPowerEvent { turnoutID = turnoutID };
         this.SendEvent<CutPowerEvent>(e);
     }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 7174153401194347040}
   - component: {fileID: 7799307531978560798}
   - component: {fileID: 2862564270047508900}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Translate2ToUpSide
   m_TagString: Untagged
   m_Icon: {fileID: 0}

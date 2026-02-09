@@ -10,22 +10,23 @@ public class TurnoutModel : AbstractModel
     public BindableProperty<Route> targetRoute = new BindableProperty<Route>();
     public List<NodeValue> nodeValues = new List<NodeValue>();
     public bool isCorrectRoute;
+    public int scorePanelIndex;
 
     protected override void OnInit()
     {
         routeCount = 10;
         currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
-            new TurnoutMachine(TurnoutID.Turnout01, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout01, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout02,
-            new TurnoutMachine(TurnoutID.Turnout02, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout02, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,
-            new TurnoutMachine(TurnoutID.Turnout03, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout03, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.反位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout04,
-            new TurnoutMachine(TurnoutID.Turnout04, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout04, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout05,
-            new TurnoutMachine(TurnoutID.Turnout05, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout05, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.反位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout06,
-            new TurnoutMachine(TurnoutID.Turnout06, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout06, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
     }
 }

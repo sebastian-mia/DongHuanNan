@@ -45,7 +45,7 @@ public class CutPowerUI : UIBase, IController
     private void cutPower()
     {
         this.SendCommand<CutPowerCommand>(new CutPowerCommand(turnoutID));
-        if (this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut)
+        if (this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].IsPowerCut == IsPowerCut.已断电)
         {
             OnHide();
         }

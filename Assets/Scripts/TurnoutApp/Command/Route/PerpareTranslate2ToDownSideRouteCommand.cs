@@ -9,10 +9,10 @@ public class PerpareTranslate2ToDownSideRouteCommand : AbstractCommand
     {
         this.GetModel<TurnoutModel>().targetRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout04, RedLightPosition.折返线2道));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
-            new TurnoutMachine(TurnoutID.Turnout01, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout01, LockedState.反位钩锁, IsPowerCut.已断电, TurnoutState.反位));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,
-            new TurnoutMachine(TurnoutID.Turnout04, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout04, LockedState.反位钩锁, IsPowerCut.已断电, TurnoutState.反位));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout04,
-            new TurnoutMachine(TurnoutID.Turnout04, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout04, LockedState.反位钩锁, IsPowerCut.已断电, TurnoutState.反位));
     }
 }

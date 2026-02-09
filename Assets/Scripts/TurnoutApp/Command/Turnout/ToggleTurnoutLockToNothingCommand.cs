@@ -14,6 +14,6 @@ public class ToggleTurnoutLockToNothingCommand : AbstractCommand
 
     protected override void OnExecute()
     {
-        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.Nothing;
+        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState = LockedState.未加锁;
     }
 }

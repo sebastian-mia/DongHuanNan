@@ -2324,7 +2324,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 39408d0fdd150a34483f471f92140024, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handPerfab: {fileID: 0}
   inputDeviceCharacteristics: 256
   pokeAttachTransform: {fileID: 1136772218859966988}
   directAttachTransform: {fileID: 3924186195475769703}

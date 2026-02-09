@@ -14,6 +14,6 @@ public class ToggleTurnoutToNormalCommand : AbstractCommand
 
     protected override void OnExecute()
     {
-        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.Normal;
+        this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].TurnoutState = TurnoutState.定位;
     }
 }

@@ -16,14 +16,10 @@ public class TrunoutScoreUI : MonoBehaviour, IController
     private string valuePanelName = "ValuePanel";
     public Button restartButton;
 
-    void Start()
-    {
-        restartButton.onClick.AddListener(ReturnMenuScene);
-        content = transform.GetComponent<ScrollRect>().content;
-    }
-
     private void OnEnable()
     {
+        restartButton.onClick.AddListener(ReturnMenuScene);
+        content = transform.GetComponentInChildren<ScrollRect>().content;
         turnoutModel = this.GetModel<TurnoutModel>();
     }
 
@@ -51,11 +47,13 @@ public class TrunoutScoreUI : MonoBehaviour, IController
             valuePanel.GetComponent<NodeValueUI>().currentValue.text = nodeValue.currentValue;
             if (turnoutModel.nodeValues[i].isConsistence)
             {
+                Debug.Log("corrent");
                 valuePanel.GetComponent<NodeValueUI>().faultImage.gameObject.SetActive(false);
                 valuePanel.GetComponent<NodeValueUI>().correntImage.gameObject.SetActive(true);
             }
             else
             {
+                Debug.Log("fault");
                 valuePanel.GetComponent<NodeValueUI>().faultImage.gameObject.SetActive(true);
                 valuePanel.GetComponent<NodeValueUI>().correntImage.gameObject.SetActive(false);
             }
@@ -64,6 +62,13 @@ public class TrunoutScoreUI : MonoBehaviour, IController
 
     private void ReturnMenuScene()
     {
+        for (int i = 0; i < content.childCount; i++)
+        {
+            Destroy(content.GetChild(i).gameObject);
+        }
+
+        turnoutModel.nodeValues.Clear();
+        turnoutModel.scorePanelIndex = 0;
         VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }
 

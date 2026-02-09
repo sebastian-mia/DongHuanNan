@@ -39,7 +39,6 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private TurnoutMoveTByKnob turnoutMoveTByKnob;
 
     //UI
-    public TeleportationAnchor teleportationAnchor;
     public Transform butterflyKey;
     private readonly string cutPowerTag = "CutPower";
     private Animator animator;
@@ -129,7 +128,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private void GetHandlerInteractables(SelectEnterEventArgs args)
     {
         if (args.interactableObject == null) return;
-        if (turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState != LockedState.Nothing) return;
+        if (turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState != LockedState.未加锁) return;
 
         xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
         waistSlotItem = args.interactableObject.transform.GetComponent<WaistSlotItem>();

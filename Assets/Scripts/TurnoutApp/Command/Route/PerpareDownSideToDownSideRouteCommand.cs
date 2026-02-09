@@ -10,6 +10,6 @@ public class PerpareDownSideToDownSideRouteCommand : AbstractCommand
         this.GetModel<TurnoutModel>().targetRoute
             .SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
-            new TurnoutMachine(TurnoutID.Turnout01, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout01, LockedState.定位钩锁, IsPowerCut.已断电, TurnoutState.定位));
     }
 }

@@ -500,7 +500,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnoutID: 0
   isStartReverse: 0
-  teleportationAnchor: {fileID: 0}
   butterflyKey: {fileID: 8786855847309296422}
 --- !u!114 &9003182662130572776
 MonoBehaviour:
@@ -1170,8 +1169,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.13
+  m_Center: {x: 0, y: 0, z: 0.1}
 --- !u!114 &2482908203143311972
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3040,6 +3039,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8962407237762970256, guid: 20af3728fc9d2e84c8648c1c222d6fb2,
+        type: 3}
+      propertyPath: m_InteractionLayers.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3113,6 +3117,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7284544535908935835, guid: d462c23d988c7d243a22a31e7977d73b,
+        type: 3}
+      propertyPath: m_InteractionLayers.m_Bits
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 8026304980268888258, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}

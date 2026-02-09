@@ -4,16 +4,16 @@ using UnityEngine;
 
 public enum TurnoutState
 {
-    Normal,
-    Reverse,
-    Whatever
+    定位,
+    反位,
+    无位置
 }
 
 public enum LockedState
 {
-    Normal,
-    Reverse,
-    Nothing
+    定位钩锁,
+    反位钩锁,
+    未加锁
 }
 
 public enum TurnoutID
@@ -34,27 +34,26 @@ public enum RedLightPosition
     折返线2道
 }
 
+public enum IsPowerCut
+{
+    已断电,
+    未断电
+}
+
 public enum RouteNodeTag
 {
     道岔,
     红闪灯,
-    钩锁器
+    钩锁器,
+    断电
 }
 
 public enum LineName
 {
     一号线,
-    二号线,
-    三号线,
-    四号线,
-    五号线,
-    六号线,
-    七号线,
-    八号线
 }
 
 public enum Line1StationName
 {
-    东环南路站,
-    海晏北路站
+    东环南路站
 }

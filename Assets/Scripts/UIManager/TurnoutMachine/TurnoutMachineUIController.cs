@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
+using QFramework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
 
-public class TurnoutMachineUIController : MonoBehaviour
+public class TurnoutMachineUIController : MonoBehaviour, IController
 {
     public TurnoutID turnoutID;
     private XRSocketInteractor handlerSocketInteractor;
@@ -30,6 +31,14 @@ public class TurnoutMachineUIController : MonoBehaviour
 
         turnoutMachineUI = UIManager.Instance.ShowUI(ChooseUIByID()).GetComponent<TurnoutMachineUI>();
         turnoutMachineUI.OnShow();
+        turnoutMachineUI.cutPowerTag.gameObject.SetActive(true);
+        this.RegisterEvent<CutPowerEvent>(e =>
+        {
+            if (turnoutID == e.turnoutID)
+            {
+                HideCutPowerTag();
+            }
+        }).UnRegisterWhenGameObjectDestroyed(this);
     }
 
     private string ChooseUIByID()
@@ -62,5 +71,15 @@ public class TurnoutMachineUIController : MonoBehaviour
     {
         Debug.Log(turnoutID + "转动");
         turnoutMachineUI.handlerTag.SetText("转动");
+    }
+
+    private void HideCutPowerTag()
+    {
+        turnoutMachineUI.cutPowerTag.gameObject.SetActive(false);
+    }
+
+    public IArchitecture GetArchitecture()
+    {
+        return TurnoutApp.Interface;
     }
 }

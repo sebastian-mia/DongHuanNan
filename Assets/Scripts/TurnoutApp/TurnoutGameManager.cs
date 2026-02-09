@@ -41,26 +41,31 @@ public class TurnoutGameManager : MonoBehaviour, IController
     {
         this.RegisterEvent<ShowScorePanelEvent>(e =>
         {
-            UIManager.Instance.HideUI(targetRoute);
-            var scorePanel = UIManager.Instance.ShowUI(scorePanelName);
-            var turnoutScoreUI = scorePanel.GetComponent<TrunoutScoreUI>();
-            if (turnoutScoreUI != null)
+            if (turnoutModel.scorePanelIndex <= 0)
             {
-                turnoutScoreUI.projectName.text = currentRouteName;
-                turnoutScoreUI.ShowNodeValue();
-            }
+                UIManager.Instance.HideUI(targetRoute);
+                var scorePanel = UIManager.Instance.ShowUI(scorePanelName);
+                var turnoutScoreUI = scorePanel.GetComponent<TrunoutScoreUI>();
+                if (turnoutScoreUI != null)
+                {
+                    turnoutScoreUI.projectName.text = currentRouteName;
+                    turnoutScoreUI.ShowNodeValue();
+                }
 
-            if (turnoutModel.isCorrectRoute)
-            {
-                ShowRoute();
+                if (turnoutModel.isCorrectRoute)
+                {
+                    ShowRoute();
+                }
+
+                turnoutModel.scorePanelIndex++;
             }
-        });
+        }).UnRegisterWhenGameObjectDestroyed(this);
     }
 
     private void CreateTargetRoute()
     {
-        // randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
-        randomNum = 6;
+        randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
+        // randomNum = 6;
         targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
@@ -120,9 +125,9 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
         if (randomNum == 9)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
+            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路上行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
-            this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
+            this.SendCommand<PerpareTranslate1ToUpSideRouteCommand>();
         }
 
         if (randomNum == 10)
@@ -157,7 +162,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
         if (randomNum == 5)
         {
-            UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
+            UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
         }
 
         if (randomNum == 6)
@@ -177,7 +182,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
         if (randomNum == 9)
         {
-            UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
+            UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
         }
 
         if (randomNum == 10)

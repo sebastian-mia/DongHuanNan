@@ -7,12 +7,13 @@ public class PerpareTranslate1ToDownSideRouteCommand : AbstractCommand
 {
     protected override void OnExecute()
     {
-        this.GetModel<TurnoutModel>().targetRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout06, RedLightPosition.折返线1道));
+        this.GetModel<TurnoutModel>().targetRoute
+            .SetValueWithoutEvent(new Route(TurnoutID.Turnout06, RedLightPosition.折返线1道));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
-            new TurnoutMachine(TurnoutID.Turnout01, LockedState.Nothing, false, TurnoutState.Reverse));
+            new TurnoutMachine(TurnoutID.Turnout01, LockedState.反位钩锁, IsPowerCut.已断电, TurnoutState.反位));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,
-            new TurnoutMachine(TurnoutID.Turnout03, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout03, LockedState.定位钩锁, IsPowerCut.已断电, TurnoutState.定位));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout06,
-            new TurnoutMachine(TurnoutID.Turnout06, LockedState.Nothing, false, TurnoutState.Normal));
+            new TurnoutMachine(TurnoutID.Turnout06, LockedState.定位钩锁, IsPowerCut.已断电, TurnoutState.定位));
     }
 }

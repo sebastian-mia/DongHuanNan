@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 752961636477695005}
   - component: {fileID: 753026997934020970}
   - component: {fileID: 916258011266167129}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: CutPowerTag (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -68,8 +68,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u63D2\u5165\u8776\u5F62\u94A5\u5319"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989, type: 2}
-  m_sharedMaterial: {fileID: 4010577586359184060, guid: 447532c7229b06a44a75734dd318f989,
+  m_fontAsset: {fileID: 11400000, guid: 6500f8331a8499641b7b389a1750d5dd, type: 2}
+  m_sharedMaterial: {fileID: -6830999895054859698, guid: 6500f8331a8499641b7b389a1750d5dd,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
@@ -147,7 +147,7 @@ GameObject:
   - component: {fileID: 2985556036628350440}
   - component: {fileID: 2745141434803817528}
   - component: {fileID: 8077776925324780158}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -222,7 +222,7 @@ GameObject:
   - component: {fileID: 6877922271620537035}
   - component: {fileID: 827219355958723165}
   - component: {fileID: 5928950178863477383}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Image
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -298,7 +298,7 @@ GameObject:
   - component: {fileID: 7135557688448116271}
   - component: {fileID: 2209327863441313221}
   - component: {fileID: 8139303730790662578}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: Turnout04Panel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -390,7 +390,7 @@ GameObject:
   - component: {fileID: 1827414867022312904}
   - component: {fileID: 8060863775817419982}
   - component: {fileID: 3390941347739940012}
-  m_Layer: 5
+  m_Layer: 3
   m_Name: HandlerTag (4)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -447,8 +447,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: "\u63D2\u5165\u624B\u6447\u628A"
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 447532c7229b06a44a75734dd318f989, type: 2}
-  m_sharedMaterial: {fileID: 4010577586359184060, guid: 447532c7229b06a44a75734dd318f989,
+  m_fontAsset: {fileID: 11400000, guid: 6500f8331a8499641b7b389a1750d5dd, type: 2}
+  m_sharedMaterial: {fileID: -6830999895054859698, guid: 6500f8331a8499641b7b389a1750d5dd,
     type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}

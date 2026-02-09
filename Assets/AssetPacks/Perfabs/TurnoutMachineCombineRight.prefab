@@ -110,13 +110,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 233579078595214761}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: 0.0000000745058}
+  m_LocalRotation: {x: -0, y: 1, z: -0, w: -0.00000035762784}
   m_LocalPosition: {x: -2.378, y: -0.039, z: 1.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8398823240762627937}
-  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -540, z: 0}
 --- !u!135 &1549010491044420582
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -136,8 +136,8 @@ SphereCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Radius: 0.1
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Radius: 0.13
+  m_Center: {x: 0, y: 0, z: -0.1}
 --- !u!114 &8273655561651553291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -642,7 +642,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   turnoutID: 1
   isStartReverse: 0
-  teleportationAnchor: {fileID: 0}
   butterflyKey: {fileID: 702979778853866020}
 --- !u!114 &4521135726536455369
 MonoBehaviour:
@@ -2702,6 +2701,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8962407237762970256, guid: 20af3728fc9d2e84c8648c1c222d6fb2,
+        type: 3}
+      propertyPath: m_InteractionLayers.m_Bits
+      value: 128
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2731,6 +2735,11 @@ PrefabInstance:
       propertyPath: m_InteractionLayers.m_Bits
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 656631736021455390, guid: 8e762efaac6ac36478c60e5d6318d042,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1763111774984170557, guid: 8e762efaac6ac36478c60e5d6318d042,
         type: 3}
       propertyPath: m_Enabled
@@ -2740,6 +2749,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: "\u624B\u6447\u628A_Knob"
+      objectReference: {fileID: 0}
+    - target: {fileID: 2003804385359978614, guid: 8e762efaac6ac36478c60e5d6318d042,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2250819632585137820, guid: 8e762efaac6ac36478c60e5d6318d042,
         type: 3}
@@ -2899,6 +2913,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalPosition.z
       value: 0.067
+      objectReference: {fileID: 0}
+    - target: {fileID: 7284544535908935835, guid: d462c23d988c7d243a22a31e7977d73b,
+        type: 3}
+      propertyPath: m_InteractionLayers.m_Bits
+      value: 128
       objectReference: {fileID: 0}
     - target: {fileID: 8026304980268888258, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}

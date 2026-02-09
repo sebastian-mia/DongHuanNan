@@ -179,6 +179,49 @@ public static class UITweenAnimation
             });
     }
 
+    // 左右拉伸循环动画（呼吸效果）- 返回Sequence供外部控制
+    public static Sequence StretchLoop(
+        this Transform target,
+        float stretchScaleX = 1.3f,
+        float stretchDuration = 0.3f,
+        float shrinkDuration = 0.3f,
+        Ease easeStretch = Ease.OutQuad,
+        Ease easeShrink = Ease.InQuad,
+        float delayBetween = 0f,
+        LoopType loopType = LoopType.Restart)
+    {
+        if (target == null) return null;
+        
+        // 创建序列
+        Sequence sequence = DOTween.Sequence().SetUpdate(true);
+        
+        // 保存原始缩放
+        Vector3 originalScale = target.localScale;
+        
+        // 1. 拉伸阶段：X轴放大
+        sequence.Append(
+            target.DOScaleX(originalScale.x * stretchScaleX, stretchDuration)
+                  .SetEase(easeStretch)
+        );
+        
+        // 可选：添加延迟
+        if (delayBetween > 0)
+        {
+            sequence.AppendInterval(delayBetween);
+        }
+        
+        // 2. 收缩阶段：回到原始X轴缩放
+        sequence.Append(
+            target.DOScaleX(originalScale.x, shrinkDuration)
+                  .SetEase(easeShrink)
+        );
+        
+        // 设置无限循环
+        sequence.SetLoops(-1, loopType);
+        
+        return sequence;
+    }
+
     // 序列动画（组合多个动画）
     public static void SequenceAnimation(this GameObject target, params Tween[] tweens)
     {
