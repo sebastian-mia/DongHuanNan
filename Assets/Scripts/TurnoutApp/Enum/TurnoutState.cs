@@ -57,3 +57,9 @@ public enum Line1StationName
 {
     东环南路站
 }
+
+public enum LocomotionMode
+{
+    挥动,
+    传送,
+}

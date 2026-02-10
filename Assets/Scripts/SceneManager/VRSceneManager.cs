@@ -41,7 +41,6 @@ public class VRSceneManager : MonoBehaviour
     
     private List<Scene> loadedScenes = new List<Scene>();
     private bool isLoading = false;
-    private bool wasLocomotionEnabled = true;
     private bool isMovementRestricted = false;
     
     private GameObject leftController;
@@ -277,15 +276,18 @@ public class VRSceneManager : MonoBehaviour
             
             SetControllersAndSlotsVisible(true);
             
+            // 修正：根据场景限制状态决定是否启用移动
             if (disableMovementDuringLoading)
             {
                 if (isMovementRestricted)
                 {
+                    SetLocomotionEnabled(false);
                     Debug.Log("[VRSceneManager] 加载完成，MenuScene 中移动受限");
                 }
                 else
                 {
                     SetLocomotionEnabled(true);
+                    Debug.Log("[VRSceneManager] 加载完成，恢复移动");
                 }
             }
         }
@@ -394,13 +396,16 @@ public class VRSceneManager : MonoBehaviour
             
             SetControllersAndSlotsVisible(true);
             
+            // 修正：根据场景限制状态决定是否启用移动
             if (isMovementRestricted)
             {
                 SetLocomotionEnabled(false);
+                Debug.Log("[VRSceneManager] 切换完成，移动受限");
             }
             else
             {
                 SetLocomotionEnabled(true);
+                Debug.Log("[VRSceneManager] 切换完成，恢复移动");
             }
         }
     }
@@ -534,7 +539,6 @@ public class VRSceneManager : MonoBehaviour
         if (autoRestrictInMenu && restrictMovementScenes.Contains(sceneName))
         {
             Debug.Log($"[VRSceneManager] {sceneName} 中限制移动");
-            SetLocomotionEnabled(false);
             isMovementRestricted = true;
         }
         else
@@ -580,17 +584,20 @@ public class VRSceneManager : MonoBehaviour
 
     private void SetLocomotionEnabled(bool enabled)
     {
-        if (locomotionSystem == null) return;
+        if (locomotionSystem == null)
+        {
+            // 尝试重新查找
+            locomotionSystem = FindObjectOfType<LocomotionSystem>();
+            if (locomotionSystem == null)
+            {
+                Debug.LogWarning("[VRSceneManager] 未找到 LocomotionSystem");
+                return;
+            }
+        }
         
-        if (!enabled)
-        {
-            wasLocomotionEnabled = locomotionSystem.enabled;
-            locomotionSystem.enabled = false;
-        }
-        else
-        {
-            locomotionSystem.enabled = wasLocomotionEnabled;
-        }
+        // 直接设置启用状态，不依赖缓存
+        locomotionSystem.enabled = enabled;
+        Debug.Log($"[VRSceneManager] LocomotionSystem {(enabled ? "启用" : "禁用")}");
     }
 
     private Transform FindSpawnPointInScene(Scene scene)

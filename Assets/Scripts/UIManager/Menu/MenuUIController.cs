@@ -14,11 +14,13 @@ public class MenuUIController : MonoBehaviour
     private readonly string StartMenuPanelTag = "StartMenuPanel";
     private readonly string ToggleProjectPanelTag = "ToggleProjectPanel";
     private readonly string TurnoutProjectPanelTag = "TurnoutProjectPanel";
+    private readonly string LocomotionModePanelTag = "LocomotionModePanel";
 
     //Panel
     private MenuPanel startMenuPanel;
     private ToggleProjectPanel toggleProjectPanel;
     private TurnoutProjectPanel turnoutProjectPanel;
+    private LocomotionModePanel locomotionModePanel;
 
     //Index
     private int turnoutProjectButtonIndex;
@@ -31,7 +33,13 @@ public class MenuUIController : MonoBehaviour
         if (startMenuPanel != null)
         {
             startMenuPanel.startGameButton.onClick.AddListener(ShowToggleProjectPanel);
+            startMenuPanel.settingButton.onClick.AddListener(ShowLocomotionModePanel);
         }
+    }
+
+    private void ShowLocomotionModePanel()
+    {
+        locomotionModePanel = UIManager.Instance.PushUI(LocomotionModePanelTag).GetComponent<LocomotionModePanel>();
     }
 
 
