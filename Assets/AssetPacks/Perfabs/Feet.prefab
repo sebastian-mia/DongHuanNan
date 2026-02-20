@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5040991390121595485}
+  - component: {fileID: 4797677345330000866}
   m_Layer: 0
   m_Name: Feet
   m_TagString: Untagged
@@ -32,6 +33,18 @@ Transform:
   - {fileID: 7631751119793752239}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4797677345330000866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4480883997794352401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63df93dee6eeada45a5955d19a5d6cde, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4614249907843730941
 GameObject:
   m_ObjectHideFlags: 0

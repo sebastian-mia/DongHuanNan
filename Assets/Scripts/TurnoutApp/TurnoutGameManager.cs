@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using QFramework;
 using TMPro;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class TurnoutGameManager : MonoBehaviour, IController
@@ -29,6 +30,14 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private readonly string scorePanelName = "ScorePanel";
     private string currentRouteName;
     private int randomNum;
+
+    [Header("B 键输入")] [Tooltip("右手 B 键输入动作")]
+    public InputActionReference rightBButton;
+
+    //Panel
+    private readonly string returnButtonPanelTag = "ReturnButtonPanel";
+    private GameObject returnButtonPanel;
+    private bool isReturnButtonPanelShow = true;
 
     void Awake()
     {
@@ -60,6 +69,24 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 turnoutModel.scorePanelIndex++;
             }
         }).UnRegisterWhenGameObjectDestroyed(this);
+    }
+
+    private void OnEnable()
+    {
+        if (rightBButton?.action != null)
+        {
+            rightBButton.action.Enable();
+            rightBButton.action.started += OnRightBButtonPressed;
+        }
+    }
+
+    private void OnDisable()
+    {
+        // 禁用输入动作
+        if (rightBButton?.action != null)
+        {
+            rightBButton.action.started -= OnRightBButtonPressed;
+        }
     }
 
     private void CreateTargetRoute()
@@ -194,6 +221,24 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private void CaculateScore()
     {
     }
+
+    // ========== 事件回调方法 ==========
+
+    private void OnRightBButtonPressed(InputAction.CallbackContext context)
+    {
+        if (isReturnButtonPanelShow)
+        {
+            returnButtonPanel = UIManager.Instance.ShowUI(returnButtonPanelTag);
+        }
+        else
+        {
+            if (returnButtonPanel != null)
+                UIManager.Instance.HideUI(returnButtonPanel);
+        }
+
+        isReturnButtonPanelShow = !isReturnButtonPanelShow;
+    }
+
 
     void Update()
     {

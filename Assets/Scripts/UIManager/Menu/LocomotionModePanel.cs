@@ -18,7 +18,7 @@ public class LocomotionModePanel : MonoBehaviour
     void Start()
     {
         locomotionModeController = FindObjectOfType<LocomotionModeController>();
-        locomotionModeController.SetTeleportInputEnabled(false);
+        locomotionModeController.SetLocomotionMode(LocomotionMode.挥动);
         if (correntButton != null)
         {
             correntButton.onClick.AddListener(() =>

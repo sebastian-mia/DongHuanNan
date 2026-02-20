@@ -14,11 +14,11 @@ public class TrunoutScoreUI : MonoBehaviour, IController
     private Transform content;
     private TurnoutModel turnoutModel;
     private string valuePanelName = "ValuePanel";
-    public Button restartButton;
+    public Button returnButton;
 
     private void OnEnable()
     {
-        restartButton.onClick.AddListener(ReturnMenuScene);
+        returnButton.onClick.AddListener(ReturnMenuScene);
         content = transform.GetComponentInChildren<ScrollRect>().content;
         turnoutModel = this.GetModel<TurnoutModel>();
     }

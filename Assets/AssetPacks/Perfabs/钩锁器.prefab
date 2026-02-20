@@ -254,7 +254,8 @@ GameObject:
   - component: {fileID: 4147290327524435718}
   - component: {fileID: 5723291836571406502}
   - component: {fileID: 8888020313026929438}
-  - component: {fileID: 6241388348407270860}
+  - component: {fileID: 1014587118349126492}
+  - component: {fileID: 6211580998029057025}
   m_Layer: 0
   m_Name: "\u94A9\u9501\u5668"
   m_TagString: Untagged
@@ -344,12 +345,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_InteractionManager: {fileID: 0}
   m_Colliders:
+  - {fileID: 1014587118349126492}
   - {fileID: 1185707856571030145}
   m_InteractionLayerMask:
     serializedVersion: 2
     m_Bits: 4294967295
   m_InteractionLayers:
-    m_Bits: 385
+    m_Bits: 129
   m_DistanceCalculationMode: 1
   m_SelectMode: 0
   m_FocusMode: 1
@@ -483,7 +485,28 @@ MonoBehaviour:
   m_StartingSingleGrabTransformers: []
   m_StartingMultipleGrabTransformers: []
   m_AddDefaultGrabTransformers: 1
---- !u!114 &6241388348407270860
+--- !u!135 &1014587118349126492
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2863723512598512707}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.13
+  m_Center: {x: 0.2, y: 0.01, z: 0}
+--- !u!114 &6211580998029057025
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -495,8 +518,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d39e918a4489f664b97bf1022c0b85e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  clonePrefab: {fileID: 0}
-  lifeAfterDrop: 0.3
+  lifeAfterDrop: 0.2
 --- !u!1 &5922308463677502824
 GameObject:
   m_ObjectHideFlags: 0

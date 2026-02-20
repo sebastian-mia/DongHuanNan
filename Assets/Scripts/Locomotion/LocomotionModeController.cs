@@ -14,13 +14,9 @@ public class LocomotionModeController : MonoBehaviour
 
     [Header("控制器管理")] [SerializeField] private ActionBasedControllerManager rightControllerManager;
 
-    // ========== 新增：Snap Turn 输入引用 ==========
-    [Header("转向输入")] [SerializeField] private InputActionReference rightSnapTurn; // XRI RightHand Locomotion/Snap Turn
-
-
     private void Start()
     {
-        SetTeleportInputEnabled(false);
+        SetLocomotionMode(LocomotionMode.挥动);
     }
 
     public void SetLocomotionMode(LocomotionMode mode)
