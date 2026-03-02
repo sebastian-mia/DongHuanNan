@@ -42956,6 +42956,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rightBButton: {fileID: 3394459309945759326, guid: c348712bda248c246b8c49b3db54643f,
     type: 3}
+  waitVoiceTime: 3
+  waitVoiceIntervalTime: 1
+  longTimeWaitVoiceMinuteTime: 5
 --- !u!4 &1953533525
 Transform:
   m_ObjectHideFlags: 0
@@ -43901,37 +43904,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1997258114}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &2002661929
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2002661930}
-  m_Layer: 0
-  m_Name: StartPoint
-  m_TagString: StartPoint
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &2002661930
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2002661929}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -1, z: -0, w: -0.00000035762784}
-  m_LocalPosition: {x: -22.802187, y: -0.077, z: 31.55}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: -180, z: 0}
 --- !u!1001 &2003728956
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -52092,4 +52064,3 @@ SceneRoots:
   - {fileID: 1755362345}
   - {fileID: 972175794}
   - {fileID: 1133076410}
-  - {fileID: 2002661930}

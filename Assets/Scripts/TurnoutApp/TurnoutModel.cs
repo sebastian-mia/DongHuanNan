@@ -6,6 +6,8 @@ using QFramework;
 public class TurnoutModel : AbstractModel
 {
     public int routeCount;
+    public string currentsubProjectName = "";
+    public int currentStationId;
     public BindableProperty<Route> currentRoute = new BindableProperty<Route>();
     public BindableProperty<Route> targetRoute = new BindableProperty<Route>();
     public List<NodeValue> nodeValues = new List<NodeValue>();

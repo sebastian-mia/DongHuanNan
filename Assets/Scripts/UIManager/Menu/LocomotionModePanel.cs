@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using QFramework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.XR.Interaction.Toolkit;
 
 
-public class LocomotionModePanel : MonoBehaviour
+public class LocomotionModePanel : MonoBehaviour, IController
 {
     public TMP_Dropdown LocomotionModeDropdown;
     public Button returnButton;
@@ -15,8 +16,11 @@ public class LocomotionModePanel : MonoBehaviour
     private LocomotionModeController locomotionModeController;
     private LocomotionMode currentLocomotionMode = LocomotionMode.挥动;
 
+    private EnumUtils enumUtils;
+
     void Start()
     {
+        enumUtils = this.GetUtility<EnumUtils>();
         locomotionModeController = FindObjectOfType<LocomotionModeController>();
         locomotionModeController.SetLocomotionMode(LocomotionMode.挥动);
         if (correntButton != null)
@@ -44,10 +48,10 @@ public class LocomotionModePanel : MonoBehaviour
 
     private void InitLineAndStationOptions()
     {
-        for (int i = 0; i < EnumUtils.GetCount<LocomotionMode>(); i++)
+        for (int i = 0; i < enumUtils.GetCount<LocomotionMode>(); i++)
         {
             var option = new TMP_Dropdown.OptionData();
-            option.text = EnumUtils.GetValues<LocomotionMode>()[i].ToString();
+            option.text = enumUtils.GetValues<LocomotionMode>()[i].ToString();
             LocomotionModes.Add(option);
         }
 
@@ -60,10 +64,10 @@ public class LocomotionModePanel : MonoBehaviour
     {
         LocomotionModes.Clear();
         LocomotionModeDropdown.options.Clear();
-        for (int i = 0; i < EnumUtils.GetCount<LocomotionMode>(); i++)
+        for (int i = 0; i < enumUtils.GetCount<LocomotionMode>(); i++)
         {
             var option = new TMP_Dropdown.OptionData();
-            option.text = EnumUtils.GetValues<LocomotionMode>()[i].ToString();
+            option.text = enumUtils.GetValues<LocomotionMode>()[i].ToString();
             LocomotionModes.Add(option);
         }
 
@@ -89,5 +93,10 @@ public class LocomotionModePanel : MonoBehaviour
     private void ReturnPrePanel()
     {
         UIManager.Instance.PopUI();
+    }
+
+    public IArchitecture GetArchitecture()
+    {
+        return RailGameApp.Interface;
     }
 }

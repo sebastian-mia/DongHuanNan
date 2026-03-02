@@ -230,8 +230,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0.0011857917, y: 0.0046061072}
-  m_SizeDelta: {x: 0, y: 632.2}
+  m_AnchoredPosition: {x: -0.004413736, y: 0.0044356175}
+  m_SizeDelta: {x: 0, y: 797.1}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &3864351155229046793
 MonoBehaviour:
@@ -1021,6 +1021,8 @@ GameObject:
   - component: {fileID: 1282131955500559752}
   - component: {fileID: 4993088023194193140}
   - component: {fileID: 3534816481161499487}
+  - component: {fileID: -2987703125433397595}
+  - component: {fileID: 4167506641067166501}
   m_Layer: 5
   m_Name: ScorePanel
   m_TagString: Untagged
@@ -1041,8 +1043,8 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2956873774276332593}
-  - {fileID: 5080511854795821089}
   - {fileID: 5536817347386024297}
+  - {fileID: 5080511854795821089}
   - {fileID: 419670488941571032}
   - {fileID: 6066737833490652612}
   - {fileID: 714414109299811311}
@@ -1103,8 +1105,38 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f3374e9d2254b247ab8c4727ae81a22, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  projectName: {fileID: 2053016421829381987}
+  subProjectName: {fileID: 2053016421829381987}
+  valuePanelName: ValuePanel
   returnButton: {fileID: 7291649767022991924}
+  returnPerUIButton: {fileID: 0}
+--- !u!114 &-2987703125433397595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5326585137317780043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03d09d881998db442a570f8f38bb0dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverCooldown: 0.1
+--- !u!114 &4167506641067166501
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5326585137317780043}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d88a6778e89a20d40a8d422865253c85, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverEnterAmp: 0.25
+  hoverStayAmp: 0.08
+  clickAmp: 0.6
 --- !u!1 &5961281212294522716
 GameObject:
   m_ObjectHideFlags: 0
@@ -1880,8 +1912,8 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 4480447650872752752}
   m_HandleRect: {fileID: 7161936811956986091}
   m_Direction: 2
-  m_Value: -0.14285715
-  m_Size: 0.9999966
+  m_Value: 0.9999852
+  m_Size: 0.79312426
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:

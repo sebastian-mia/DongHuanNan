@@ -63,3 +63,8 @@ public enum LocomotionMode
     挥动,
     传送,
 }
+
+public enum ProjectName
+{
+    人工准备进路
+}

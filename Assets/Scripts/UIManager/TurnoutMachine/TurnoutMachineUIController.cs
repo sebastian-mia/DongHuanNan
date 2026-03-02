@@ -75,11 +75,11 @@ public class TurnoutMachineUIController : MonoBehaviour, IController
 
     private void HideCutPowerTag()
     {
-        turnoutMachineUI.cutPowerTag.gameObject.SetActive(false);
+        turnoutMachineUI.cutPowerTag.SetText("已断电");
     }
 
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

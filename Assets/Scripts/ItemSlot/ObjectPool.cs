@@ -46,7 +46,6 @@ public class ObjectPool : MonoBehaviour
         if (enqueue) pool.Enqueue(obj);
         return obj;
     }
-
     public GameObject Get()
     {
         GameObject obj = null;

@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NodeValue
+public class  NodeValue
 {
     public string nodeName { get; set; }
     public string targetValue { get; set; }

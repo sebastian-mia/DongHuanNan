@@ -5,22 +5,43 @@ using QFramework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.UIElements;
 using Button = UnityEngine.UI.Button;
 
 public class TrunoutScoreUI : MonoBehaviour, IController
 {
-    public TMP_Text projectName;
+    public TMP_Text subProjectName;
     private Transform content;
     private TurnoutModel turnoutModel;
-    private string valuePanelName = "ValuePanel";
+    public string valuePanelName = "ValuePanel";
     public Button returnButton;
+    public Button returnPerUIButton;
+    private TurnoutDatabaseManager turnoutDatabaseManager;
+    private TurnoutRecordModel turnoutRecordModel;
+    private GameRecordModel gameRecordModel;
+    private int projectId;
 
     private void OnEnable()
     {
-        returnButton.onClick.AddListener(ReturnMenuScene);
+        if (returnButton != null)
+        {
+            returnButton.onClick.AddListener(ReturnMenuScene);
+        }
+
+        if (returnPerUIButton != null)
+        {
+            returnPerUIButton.onClick.AddListener(ReturnPrePanel);
+        }
+
         content = transform.GetComponentInChildren<ScrollRect>().content;
         turnoutModel = this.GetModel<TurnoutModel>();
+        turnoutRecordModel = this.GetModel<TurnoutRecordModel>();
+        gameRecordModel = this.GetModel<GameRecordModel>();
+        turnoutDatabaseManager = this.GetUtility<TurnoutDatabaseManager>();
+        var projectId = turnoutDatabaseManager.GetProjectId(ProjectName.人工准备进路.ToString());
+        if (projectId.HasValue)
+        {
+            this.projectId = projectId.Value;
+        }
     }
 
     private void CreateItem(Transform valuePanel)
@@ -36,6 +57,9 @@ public class TrunoutScoreUI : MonoBehaviour, IController
 
     public void ShowNodeValue()
     {
+        var turnoutSubProjectData = new TurnoutSubProjectData(projectId,
+            turnoutModel.currentsubProjectName, gameRecordModel.UserId, turnoutModel.currentStationId);
+        var turnoutNodes = new List<TurnoutNodeData>();
         for (var i = 0; i < turnoutModel.nodeValues.Count; i++)
         {
             var nodeValue = turnoutModel.nodeValues[i];
@@ -57,7 +81,21 @@ public class TrunoutScoreUI : MonoBehaviour, IController
                 valuePanel.GetComponent<NodeValueUI>().faultImage.gameObject.SetActive(true);
                 valuePanel.GetComponent<NodeValueUI>().correntImage.gameObject.SetActive(false);
             }
+
+            var turnoutNodeData = new TurnoutNodeData(
+                nodeValue.nodeName,
+                nodeValue.targetValue, nodeValue.currentValue,
+                nodeValue.isConsistence);
+            turnoutNodes.Add(turnoutNodeData);
         }
+
+        this.SendCommand<SetTurnoutSubProjectAndNodeDataCommand>(
+            new SetTurnoutSubProjectAndNodeDataCommand(turnoutSubProjectData, turnoutNodes));
+    }
+
+    private void ReturnPrePanel()
+    {
+        UIManager.Instance.PopUI();
     }
 
     private void ReturnMenuScene()
@@ -69,11 +107,15 @@ public class TrunoutScoreUI : MonoBehaviour, IController
 
         turnoutModel.nodeValues.Clear();
         turnoutModel.scorePanelIndex = 0;
+        turnoutModel.currentsubProjectName = null;
+        gameRecordModel.UserId = null;
+
         VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }
 
+
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

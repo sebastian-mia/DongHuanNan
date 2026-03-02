@@ -53,6 +53,6 @@ public class RedLightSocketController : MonoBehaviour, IController
 
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

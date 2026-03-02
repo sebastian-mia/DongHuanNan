@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
-using Unity.VisualScripting;
 using UnityEngine.SocialPlatforms;
 using UnityEngine.UI;
 using UnityEngine.XR.Content.Interaction;
@@ -48,12 +47,16 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private readonly string turnoutNormalSideTag = "NormalSide";
     private readonly string turnoutReverseSideTag = "ReverseSide";
 
+    private AudioManager audioManager;
+    private int playTurnoutMachineSoundIndex;
+
 
     //Modle
     private TurnoutModel turnoutModel;
 
     public void Start()
     {
+        audioManager = this.GetUtility<AudioManager>();
         xRKnob = GetComponentInChildren<XRKnob>();
         rotationOnlySync = GetComponentInChildren<RotationOnlySync>();
         turnoutMoveTByKnob = GetComponentInChildren<TurnoutMoveTByKnob>();
@@ -186,10 +189,12 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void EnableHandler(float value)
     {
+        audioManager.PlayturnoutMachineWorkingSound();
         if (currentValue <= 0 + deathFloat)
         {
             if (value >= 1 - deathFloat)
             {
+                audioManager.PlayturnoutMachineEndingSound();
                 currentValue = 1;
                 if (isStartReverse)
                 {
@@ -209,6 +214,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
         {
             if (value <= 0 + deathFloat)
             {
+                audioManager.PlayturnoutMachineEndingSound();
                 currentValue = 0;
                 if (isStartReverse)
                 {
@@ -254,10 +260,16 @@ public class TurnoutMachineController : MonoBehaviour, IController
         animator.SetTrigger(cutPowerTag);
     }
 
+    public void PlayCutPowerSound()
+    {
+        audioManager.PlayturnoutMachineCutPowerSound();
+    }
+
     public void HideButterflyKey()
     {
         butterflyKey.gameObject.SetActive(false);
     }
+
 
     private void Update()
     {
@@ -265,6 +277,6 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

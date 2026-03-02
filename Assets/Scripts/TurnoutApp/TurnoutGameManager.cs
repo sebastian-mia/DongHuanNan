@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using UnityEngine;
 using QFramework;
 using TMPro;
+using TreeEditor;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
@@ -12,6 +13,11 @@ public class TurnoutGameManager : MonoBehaviour, IController
 {
     private TurnoutModel turnoutModel;
     private int correctCount = 0;
+    public readonly string spawnPointInDownPath = "Perfab/StartPointInDown";
+    public readonly string spawnPointInUpPath = "Perfab/StartPointInUp";
+    private bool currentSpawnPointIsDown;
+    private GameObject currentSpawnPoint;
+
 
     //RouteShow
     private readonly string downSideToDownSideRouteShowName = "DownSideToDownSide";
@@ -39,11 +45,21 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private GameObject returnButtonPanel;
     private bool isReturnButtonPanelShow = true;
 
+    //Audio
+    private AudioManager audioManager;
+    public float waitVoiceTime = 3f;
+    public float waitVoiceIntervalTime = 1f;
+    public float longTimeWaitVoiceMinuteTime = 5f;
+    private bool nodeHasFault;
+
+
     void Awake()
     {
         turnoutModel = this.GetModel<TurnoutModel>();
-        CreateTargetRoute();
         UIManager.Instance.ScanCanvas();
+        CreateTargetRoute();
+        InitspawnPoint();
+        audioManager = this.GetUtility<AudioManager>();
     }
 
     void Start()
@@ -57,7 +73,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 var turnoutScoreUI = scorePanel.GetComponent<TrunoutScoreUI>();
                 if (turnoutScoreUI != null)
                 {
-                    turnoutScoreUI.projectName.text = currentRouteName;
+                    turnoutScoreUI.subProjectName.text = currentRouteName;
                     turnoutScoreUI.ShowNodeValue();
                 }
 
@@ -66,6 +82,8 @@ public class TurnoutGameManager : MonoBehaviour, IController
                     ShowRoute();
                 }
 
+                JudgeGameStateToPlayVoice();
+
                 turnoutModel.scorePanelIndex++;
             }
         }).UnRegisterWhenGameObjectDestroyed(this);
@@ -73,6 +91,9 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
     private void OnEnable()
     {
+        audioManager.PlayturnoutBackGroundMusic();
+        StartCoroutine("PlayTurnoutProjectStartVoice");
+        StartCoroutine("LongTimeTipCounter");
         if (rightBButton?.action != null)
         {
             rightBButton.action.Enable();
@@ -89,6 +110,21 @@ public class TurnoutGameManager : MonoBehaviour, IController
         }
     }
 
+    private void InitspawnPoint()
+    {
+        if (randomNum <= 5)
+        {
+            currentSpawnPointIsDown = true;
+            currentSpawnPoint = Instantiate(Resources.Load<GameObject>(spawnPointInDownPath));
+        }
+
+        if (randomNum > 5 && randomNum <= 10)
+        {
+            currentSpawnPointIsDown = false;
+            currentSpawnPoint = Instantiate(Resources.Load<GameObject>(spawnPointInUpPath));
+        }
+    }
+
     private void CreateTargetRoute()
     {
         randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
@@ -96,72 +132,92 @@ public class TurnoutGameManager : MonoBehaviour, IController
         targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至盛莫路下行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:邱隘东下行至东环南路下行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:邱隘东下行至东环南路下行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareDownSideToDownSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 2)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折1道进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路下行至折1道进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折1道进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareDownSideToTranslate1RouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 3)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折2道进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路下行至折2道进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折2道进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareDownSideToTranslate2RouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 4)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路下行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折1道至东环南路下行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路下行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareTranslate1ToDownSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 5)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折2道至东环南路下行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 6)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至邱隘东上行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至邱隘东上行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至邱隘东上行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareUpSideToUpSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 7)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折1道进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至折1道进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折1道进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareUpSideToTranslate1RouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 8)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折2道进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至折2道进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折2道进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareUpSideToTranslate2RouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 9)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路上行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折1道至东环南路上行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路上行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareTranslate1ToUpSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
 
         if (randomNum == 10)
         {
-            targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路上行进路";
+            UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折2道至东环南路上行进路", 2f);
+            // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路上行进路";
             currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
             this.SendCommand<PerpareTranslate2ToUpSideRouteCommand>();
+            this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
     }
 
@@ -255,8 +311,115 @@ public class TurnoutGameManager : MonoBehaviour, IController
         // }
     }
 
+    //音效
+    private IEnumerator PlayTurnoutProjectStartVoice()
+    {
+        yield return new WaitForSeconds(waitVoiceTime);
+        if (currentSpawnPointIsDown)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectWelcomeDownTailSoundPath);
+        }
+        else
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectWelcomeUpHeadSoundPath);
+        }
+
+        if (randomNum == 1)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteDownSideToDownSideSoundPath);
+        }
+
+        if (randomNum == 2)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteDownSideToTranslate1SoundPath);
+        }
+
+        if (randomNum == 3)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteDownSideToTranslate2SoundPath);
+        }
+
+        if (randomNum == 4)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteTranslate1ToDownSideSoundPath);
+        }
+
+        if (randomNum == 5)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteTranslate2ToDownSideSoundPath);
+        }
+
+        if (randomNum == 6)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteUpSideToUpSideSoundPath);
+        }
+
+        if (randomNum == 7)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteUpSideToTranslate1SoundPath);
+        }
+
+        if (randomNum == 8)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteUpSideToTranslate2SoundPath);
+        }
+
+        if (randomNum == 9)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteTranslate1ToUpSideSoundPath);
+        }
+
+        if (randomNum == 10)
+        {
+            audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectRouteTranslate2ToUpSideSideSoundPath);
+        }
+    }
+
+    private IEnumerator LongTimeTipCounter()
+    {
+        yield return new WaitForSeconds(longTimeWaitVoiceMinuteTime * 60f);
+        audioManager.PlayVoiceWaitLongTimeSound();
+    }
+
+    private void JudgeGameStateToPlayVoice()
+    {
+        for (int i = 0; i < turnoutModel.nodeValues.Count; i++)
+        {
+            if (turnoutModel.nodeValues[i].nodeName.Equals(RouteNodeTag.红闪灯))
+            {
+                if (!turnoutModel.nodeValues[i].isConsistence)
+                {
+                    audioManager.PlayVoiceInRedLightFault();
+                    return;
+                }
+            }
+        }
+
+        if (!turnoutModel.isCorrectRoute)
+        {
+            audioManager.PlayVoiceInRouteFault();
+            return;
+        }
+
+        for (int i = 0; i < turnoutModel.nodeValues.Count; i++)
+        {
+            if (!turnoutModel.nodeValues[i].isConsistence)
+            {
+                nodeHasFault = true;
+                audioManager.PlayVoiceInComplete();
+                return;
+            }
+        }
+
+        if (!nodeHasFault)
+        {
+            audioManager.PlayVoiceInPerfectComplete();
+            return;
+        }
+    }
+
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

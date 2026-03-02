@@ -17,8 +17,8 @@ public class OnlyRealBodyTurn : MonoBehaviour
 
     private Transform camT;
     private Vector3 lastHeadPos;
-    private float bodyYRot;
-    private float lastBodyYRot;
+    private float bodyYRot;      // 检测到的身体朝向（通过死区逻辑更新）
+    private float smoothedBodyYRot; // 平滑后的实际旋转
     
     private Vector3 localOffset;
     private Quaternion localRotOffset;
@@ -31,8 +31,8 @@ public class OnlyRealBodyTurn : MonoBehaviour
         
         Vector3 initialPos = camT.position;
         lastHeadPos = initialPos;
-        bodyYRot = GetBodyYaw(camT.rotation); // 修正：移除 isVertical 参数
-        lastBodyYRot = bodyYRot;
+        bodyYRot = GetBodyYaw(camT.rotation);
+        smoothedBodyYRot = bodyYRot;
 
         Quaternion bodyRot = Quaternion.Euler(0, bodyYRot, 0);
         Quaternion invBody = Quaternion.Inverse(bodyRot);
@@ -61,74 +61,70 @@ public class OnlyRealBodyTurn : MonoBehaviour
         Vector3 headFlatVel = (Vector3.ProjectOnPlane(headPos - lastHeadPos, Vector3.up)) / Time.deltaTime;
         lastHeadPos = headPos;
 
-        // ========== 关键修正：始终计算 Yaw，不管是否垂直 ==========
+        // ========== 身体旋转检测（死区逻辑） ==========
         float currentYaw = GetBodyYaw(camT.rotation);
         
-        // 身体旋转检测（始终更新，不判断垂直）
+        // 只有脚不动时，才更新身体朝向目标值
         if (headFlatVel.magnitude < turnDeadZone)
         {
             bodyYRot = currentYaw;
         }
 
-        Quaternion bodyRot = Quaternion.Euler(0, bodyYRot, 0);
+        // ========== 关键修改：始终平滑跟随 bodyYRot（不管是否在死区） ==========
+        float t = 1f - Mathf.Exp(-rotationSmoothing * Time.deltaTime);
+        smoothedBodyYRot = Mathf.LerpAngle(smoothedBodyYRot, bodyYRot, t);
+        
+        Quaternion bodyRot = Quaternion.Euler(0, smoothedBodyYRot, 0);
 
-        // 位置实时跟随
+        // ========== 位置实时跟随（保持相对偏移） ==========
         transform.position = headPos + bodyRot * localOffset;
         
-        // 旋转更新
-        float angleDiff = Mathf.Abs(Mathf.DeltaAngle(bodyYRot, lastBodyYRot));
-        if (angleDiff > 0.001f)
-        {
-            Quaternion targetRotation = bodyRot * localRotOffset;
-            
-            float t = 1f - Mathf.Exp(-rotationSmoothing * Time.deltaTime);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, t);
-            
-            lastBodyYRot = bodyYRot;
-        }
+        // ========== 旋转实时跟随 ==========
+        transform.rotation = bodyRot * localRotOffset;
     }
 
-    // ========== 关键修正：始终返回有效 Yaw，处理低头情况 ==========
     private float GetBodyYaw(Quaternion rotation)
     {
         Vector3 forward = rotation * Vector3.forward;
         float verticality = Mathf.Abs(forward.y);
         
-        // 如果相机接近水平（正常站立），使用 forward
-        if (verticality < 0.866f) // 小于 60 度
+        // 正常站立：使用 forward
+        if (verticality < 0.866f)
         {
             forward.y = 0;
             forward.Normalize();
             return Mathf.Atan2(forward.x, forward.z) * Mathf.Rad2Deg;
         }
         
-        // ========== 关键：低头/抬头时，使用 up 向量计算朝向 ==========
+        // 低头/抬头：使用 up 向量
         Vector3 up = rotation * Vector3.up;
         up.y = 0;
         
         if (up.sqrMagnitude > 0.001f)
         {
             up.Normalize();
-            // up 向量的 x/z 平面投影可以反映身体旋转
-            // 需要 +90 度或 -90 度偏移，因为 up 垂直于 forward
             float yawFromUp = Mathf.Atan2(up.x, up.z) * Mathf.Rad2Deg;
-            
-            // 根据低头还是抬头，决定偏移方向
-            if (forward.y > 0) // 抬头
-                return yawFromUp + 180f;
-            else // 低头
-                return yawFromUp;
+            return (forward.y > 0) ? yawFromUp + 180f : yawFromUp;
         }
         
-        // 完全垂直（理论上不会发生），保持原值
         return bodyYRot;
     }
 
     void OnDrawGizmos()
     {
         if (!drawGizmo) return;
+        
+        // 绘制当前物体
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireSphere(transform.position, 0.05f);
-        Gizmos.DrawLine(transform.position, transform.position + transform.forward * 0.1f);
+        Gizmos.DrawLine(transform.position, transform.position + transform.forward * 0.2f);
+        
+        // 绘制检测到的身体朝向（红色）
+        if (Application.isPlaying)
+        {
+            Gizmos.color = Color.red;
+            Vector3 bodyForward = Quaternion.Euler(0, bodyYRot, 0) * Vector3.forward;
+            Gizmos.DrawRay(camT.position, bodyForward * 0.3f);
+        }
     }
 }

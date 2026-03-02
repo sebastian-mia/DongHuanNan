@@ -60,6 +60,6 @@ public class TurnoutMachineUI : UIBase, IController
 
     public IArchitecture GetArchitecture()
     {
-        return TurnoutApp.Interface;
+        return RailGameApp.Interface;
     }
 }

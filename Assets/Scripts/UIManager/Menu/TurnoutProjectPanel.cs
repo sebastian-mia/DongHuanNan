@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using QFramework;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 
-public class TurnoutProjectPanel : MonoBehaviour
+public class TurnoutProjectPanel : MonoBehaviour, IController
 {
     public Button startTurnoutProjectButton;
     public TMP_InputField lineInputField;
@@ -16,8 +17,13 @@ public class TurnoutProjectPanel : MonoBehaviour
     private List<TMP_Dropdown.OptionData> stationOptions = new List<TMP_Dropdown.OptionData>();
     private readonly int stationOptionIndex;
 
+    private EnumUtils enumUtils;
+    private TurnoutDatabaseManager databaseManager;
+
     void Start()
     {
+        enumUtils = this.GetUtility<EnumUtils>();
+        databaseManager = this.GetUtility<TurnoutDatabaseManager>();
         InitLineAndStationOptions();
         lineDropdown.onValueChanged.AddListener(e =>
         {
@@ -37,20 +43,20 @@ public class TurnoutProjectPanel : MonoBehaviour
 
     private void InitLineAndStationOptions()
     {
-        for (int i = 0; i < EnumUtils.GetCount<LineName>(); i++)
+        for (int i = 0; i < enumUtils.GetCount<LineName>(); i++)
         {
             var option = new TMP_Dropdown.OptionData();
-            option.text = EnumUtils.GetValues<LineName>()[i].ToString();
+            option.text = enumUtils.GetValues<LineName>()[i].ToString();
             lineOptions.Add(option);
         }
 
         lineDropdown.AddOptions(lineOptions);
         lineInputField.text = lineDropdown.options[0].text;
 
-        for (int i = 0; i < EnumUtils.GetCount<Line1StationName>(); i++)
+        for (int i = 0; i < enumUtils.GetCount<Line1StationName>(); i++)
         {
             var stationOption = new TMP_Dropdown.OptionData();
-            stationOption.text = EnumUtils.GetValues<Line1StationName>()[i].ToString();
+            stationOption.text = enumUtils.GetValues<Line1StationName>()[i].ToString();
             stationOptions.Add(stationOption);
         }
 
@@ -65,16 +71,23 @@ public class TurnoutProjectPanel : MonoBehaviour
         stationDropdown.options.Clear();
         if (line == (int)LineName.一号线)
         {
-            for (int i = 0; i < EnumUtils.GetCount<Line1StationName>(); i++)
+            for (int i = 0; i < enumUtils.GetCount<Line1StationName>(); i++)
             {
                 var stationOption = new TMP_Dropdown.OptionData();
-                stationOption.text = EnumUtils.GetValues<Line1StationName>()[i].ToString();
+                stationOption.text = enumUtils.GetValues<Line1StationName>()[i].ToString();
                 stationOptions.Add(stationOption);
             }
         }
 
         stationDropdown.AddOptions(stationOptions);
         stationDropdown.RefreshShownValue();
-        stationInputField.text = stationDropdown.options[0].text;
+        stationInputField.text = enumUtils.GetValues<Line1StationName>()[stationDropdown.value].ToString();
+        this.SendCommand<SetCurrentStationNameCommand>(
+            new SetCurrentStationNameCommand(databaseManager.GetStationId(stationInputField.text).Value));
+    }
+
+    public IArchitecture GetArchitecture()
+    {
+        return RailGameApp.Interface;
     }
 }
