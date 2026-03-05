@@ -668,9 +668,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d88a6778e89a20d40a8d422865253c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverEnterAmp: 0.25
-  hoverStayAmp: 0.08
-  clickAmp: 0.6
+  hoverEnterAmp: 0.2
+  clickAmp: 0.2
 --- !u!1 &3860870964247041047
 GameObject:
   m_ObjectHideFlags: 0
@@ -965,7 +964,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -11.099992, y: 7.7000036}
+  m_AnchoredPosition: {x: 6, y: 7.7000036}
   m_SizeDelta: {x: 175, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9141385085138161392
@@ -1209,7 +1208,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 6, y: 7.6}
+  m_AnchoredPosition: {x: -10.8, y: 7.6}
   m_SizeDelta: {x: 175, y: 150}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1805619396539841698

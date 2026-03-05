@@ -116,14 +116,11 @@ MonoBehaviour:
   m_DirectInteractor: {fileID: 6705902936723775144}
   m_RayInteractor: {fileID: 6787622456990285255}
   m_TeleportInteractor: {fileID: 9107631483621245940}
-  m_TeleportModeActivate: {fileID: 1263111715868034790, guid: c348712bda248c246b8c49b3db54643f,
-    type: 3}
-  m_TeleportModeCancel: {fileID: 737890489006591557, guid: c348712bda248c246b8c49b3db54643f,
-    type: 3}
-  m_Turn: {fileID: 1010738217276881514, guid: c348712bda248c246b8c49b3db54643f, type: 3}
-  m_SnapTurn: {fileID: -7374733323251553461, guid: c348712bda248c246b8c49b3db54643f,
-    type: 3}
-  m_Move: {fileID: 6972639530819350904, guid: c348712bda248c246b8c49b3db54643f, type: 3}
+  m_TeleportModeActivate: {fileID: 0}
+  m_TeleportModeCancel: {fileID: 0}
+  m_Turn: {fileID: 0}
+  m_SnapTurn: {fileID: 0}
+  m_Move: {fileID: 0}
   m_UIScroll: {fileID: 2464016903823916871, guid: c348712bda248c246b8c49b3db54643f,
     type: 3}
   m_SmoothMotionEnabled: 0
@@ -1019,6 +1016,7 @@ MonoBehaviour:
   m_HitDetectionType: 0
   m_SphereCastRadius: 0.1
   m_ConeCastAngle: 6
+  m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
     m_Bits: 4294967295
@@ -2184,7 +2182,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_SelectActionTrigger: 1
-  m_HideControllerOnSelect: 0
+  m_HideControllerOnSelect: 1
   m_AllowHoveredActivate: 0
   m_TargetPriorityMode: 0
   m_PlayAudioClipOnSelectEntered: 0
@@ -2463,6 +2461,7 @@ MonoBehaviour:
   m_HitDetectionType: 2
   m_SphereCastRadius: 0.0125
   m_ConeCastAngle: 3
+  m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
     m_Bits: 2147483681
@@ -2748,6 +2747,8 @@ MonoBehaviour:
   m_StopLineAtSelection: 1
   m_SnapEndpointIfAvailable: 1
   m_LineBendRatio: 0.5
+  m_BendingEnabledInteractionLayers:
+    m_Bits: 4294967295
   m_OverrideInteractorLineOrigin: 1
   m_LineOriginTransform: {fileID: 5441470520332180568}
   m_LineOriginOffset: 0
@@ -2900,6 +2901,7 @@ MonoBehaviour:
   m_HitDetectionType: 2
   m_SphereCastRadius: 0.0125
   m_ConeCastAngle: 3
+  m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
     m_Bits: 2147483681
@@ -3185,6 +3187,8 @@ MonoBehaviour:
   m_StopLineAtSelection: 1
   m_SnapEndpointIfAvailable: 1
   m_LineBendRatio: 0.5
+  m_BendingEnabledInteractionLayers:
+    m_Bits: 4294967295
   m_OverrideInteractorLineOrigin: 1
   m_LineOriginTransform: {fileID: 5281403145368839367}
   m_LineOriginOffset: 0
@@ -4271,6 +4275,7 @@ MonoBehaviour:
   m_HitDetectionType: 0
   m_SphereCastRadius: 0.1
   m_ConeCastAngle: 6
+  m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
     m_Bits: 2147483681
@@ -4556,6 +4561,8 @@ MonoBehaviour:
   m_StopLineAtSelection: 0
   m_SnapEndpointIfAvailable: 1
   m_LineBendRatio: 0.5
+  m_BendingEnabledInteractionLayers:
+    m_Bits: 4294967295
   m_OverrideInteractorLineOrigin: 1
   m_LineOriginTransform: {fileID: 5441470520332180568}
   m_LineOriginOffset: 0
@@ -4933,6 +4940,7 @@ MonoBehaviour:
   m_RepeatRate: 0.1
   m_TrackedDeviceDragThresholdMultiplier: 2
   m_TrackedScrollDeltaMultiplier: 5
+  m_BypassUIToolkitEvents: 0
   m_ActiveInputMode: 1
   m_MaxTrackedDeviceRaycastDistance: 1000
   m_EnableXRInput: 1
@@ -5268,6 +5276,7 @@ MonoBehaviour:
   m_HitDetectionType: 0
   m_SphereCastRadius: 0.1
   m_ConeCastAngle: 6
+  m_LiveConeCastDebugVisuals: 0
   m_RaycastMask:
     serializedVersion: 2
     m_Bits: 2147483681
@@ -5554,6 +5563,8 @@ MonoBehaviour:
   m_StopLineAtSelection: 0
   m_SnapEndpointIfAvailable: 1
   m_LineBendRatio: 0.5
+  m_BendingEnabledInteractionLayers:
+    m_Bits: 4294967295
   m_OverrideInteractorLineOrigin: 1
   m_LineOriginTransform: {fileID: 0}
   m_LineOriginOffset: 0
@@ -6253,6 +6264,11 @@ PrefabInstance:
       propertyPath: returnDuration
       value: 0.1
       objectReference: {fileID: 0}
+    - target: {fileID: 534048173991056957, guid: 2908ab45f4e545146abec14bf3a235f7,
+        type: 3}
+      propertyPath: socketGracePeriod
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1644402895504342700, guid: 2908ab45f4e545146abec14bf3a235f7,
         type: 3}
       propertyPath: m_Name
@@ -6263,6 +6279,11 @@ PrefabInstance:
       propertyPath: startingObject
       value: 
       objectReference: {fileID: 7123988935727670078}
+    - target: {fileID: 4615265682513143981, guid: 2908ab45f4e545146abec14bf3a235f7,
+        type: 3}
+      propertyPath: m_TagString
+      value: WaistSlotsItem
+      objectReference: {fileID: 0}
     - target: {fileID: 6062832845833330843, guid: 2908ab45f4e545146abec14bf3a235f7,
         type: 3}
       propertyPath: m_InteractionLayers.m_Bits
@@ -6372,6 +6393,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2085829658669677193}
+    - targetCorrespondingSourceObject: {fileID: 4615265682513143981, guid: 2908ab45f4e545146abec14bf3a235f7,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3049340374366949866}
   m_SourcePrefab: {fileID: 100100000, guid: 2908ab45f4e545146abec14bf3a235f7, type: 3}
 --- !u!1 &2318487186833669385 stripped
 GameObject:
@@ -6407,12 +6432,36 @@ MonoBehaviour:
     type: 3}
   m_PrefabInstance: {fileID: 3962882248250426277}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 8570996362862406408}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ad34abafad169848a38072baa96cdb2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &8570996362862406408 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4615265682513143981, guid: 2908ab45f4e545146abec14bf3a235f7,
+    type: 3}
+  m_PrefabInstance: {fileID: 3962882248250426277}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &3049340374366949866
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8570996362862406408}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverAmp: 0.2
+  selectAmp: 0.6
+  leftTriggerAction: {fileID: -3824198262760338608, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
+  rightTriggerAction: {fileID: 5199090702169049186, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
 --- !u!1001 &7339728073839276393
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -6541,6 +6590,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8001904845637271228, guid: 2908ab45f4e545146abec14bf3a235f7,
+        type: 3}
+      propertyPath: m_TagString
+      value: WaistSlotsItem
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4615265682513143981, guid: 2908ab45f4e545146abec14bf3a235f7, type: 3}
@@ -6555,6 +6609,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3999101639544435663}
+    - targetCorrespondingSourceObject: {fileID: 8001904845637271228, guid: 2908ab45f4e545146abec14bf3a235f7,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4143690848372907027}
   m_SourcePrefab: {fileID: 100100000, guid: 2908ab45f4e545146abec14bf3a235f7, type: 3}
 --- !u!4 &232707740568961980 stripped
 Transform:
@@ -6562,13 +6620,37 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 7339728073839276393}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &781244535405105109 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 8001904845637271228, guid: 2908ab45f4e545146abec14bf3a235f7,
+    type: 3}
+  m_PrefabInstance: {fileID: 7339728073839276393}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &4143690848372907027
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 781244535405105109}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverAmp: 0.2
+  selectAmp: 0.6
+  leftTriggerAction: {fileID: -3824198262760338608, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
+  rightTriggerAction: {fileID: 5199090702169049186, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
 --- !u!114 &7986428186805394299 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 796730128306874898, guid: 2908ab45f4e545146abec14bf3a235f7,
     type: 3}
   m_PrefabInstance: {fileID: 7339728073839276393}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
+  m_GameObject: {fileID: 781244535405105109}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0ad34abafad169848a38072baa96cdb2, type: 3}
@@ -6719,6 +6801,11 @@ PrefabInstance:
       propertyPath: initialItem
       value: 
       objectReference: {fileID: 3816352358993541001}
+    - target: {fileID: 8179571103126575740, guid: e9829ff2c4015ab43926ef0ab2cc1554,
+        type: 3}
+      propertyPath: m_TagString
+      value: WaistSlotsItem
+      objectReference: {fileID: 0}
     - target: {fileID: 9017909003861451573, guid: e9829ff2c4015ab43926ef0ab2cc1554,
         type: 3}
       propertyPath: m_Name
@@ -6736,6 +6823,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3436152688319626752}
+    - targetCorrespondingSourceObject: {fileID: 8179571103126575740, guid: e9829ff2c4015ab43926ef0ab2cc1554,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8487823285625976924}
   m_SourcePrefab: {fileID: 100100000, guid: e9829ff2c4015ab43926ef0ab2cc1554, type: 3}
 --- !u!1 &165370079253067306 stripped
 GameObject:
@@ -6758,9 +6849,28 @@ MonoBehaviour:
   delayTime: 0.1
   useInstantSnap: 1
   ignoreCollisionWithSlotItems: 1
+  waistSlotItemTag: WaistSlotsItem
   homeSlotID: HandlerSlot
   restrictSocketInteractionToGrabbedOnly: 1
   socketGracePeriod: 0.5
+--- !u!114 &8487823285625976924
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 165370079253067306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  hoverAmp: 0.2
+  selectAmp: 0.6
+  leftTriggerAction: {fileID: -3824198262760338608, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
+  rightTriggerAction: {fileID: 5199090702169049186, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
 --- !u!114 &3816352358993541001 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 5133619657365461983, guid: e9829ff2c4015ab43926ef0ab2cc1554,

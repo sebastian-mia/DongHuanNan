@@ -4,24 +4,24 @@ using UnityEngine.XR.Interaction.Toolkit.Filtering;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using QFramework;
 
 [RequireComponent(typeof(XRGrabInteractable))]
-public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRSelectFilter
+public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRSelectFilter, IController
 {
-    [Header("回家设置")] 
-    public float delayTime = 1f;
+    [Header("回家设置")] public float delayTime = 1f;
     public bool useInstantSnap = true;
 
-    [Header("碰撞设置")]
-    [Tooltip("插槽内物品互相不碰撞，且外部物品与插槽内物品也不碰撞")]
+    [Header("碰撞设置")] [Tooltip("腰带物品之间永远不碰撞（通过Tag识别）")]
     public bool ignoreCollisionWithSlotItems = true;
 
-    [Header("专属槽位")] 
-    [SerializeField] private string homeSlotID;
+    [Tooltip("腰带物品的标签名称")] public string waistSlotItemTag = "WaistSlotsItem";
 
-    [Header("Socket交互设置")]
-    [Tooltip("只有被Grab抓取时才允许与Socket交互，在插槽内时禁止")]
+    [Header("专属槽位")] [SerializeField] private string homeSlotID;
+
+    [Header("Socket交互设置")] [Tooltip("只有被Grab抓取时才允许与Socket交互，在插槽内时禁止")]
     public bool restrictSocketInteractionToGrabbedOnly = true;
+
     [Tooltip("松开后多长时间内仍允许Socket吸附（秒）"), Range(0f, 2f)]
     public float socketGracePeriod = 0.5f;
 
@@ -32,8 +32,6 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     protected XRGrabInteractable grab;
     protected Rigidbody rb;
     public bool isReturning { get; protected set; } = false;
-    
-    // 🔥 关键：isInSlot 表示"此物品在插槽内"
     public bool isInSlot { get; protected set; } = false;
 
     protected Vector3 originalScale;
@@ -41,26 +39,30 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     protected WaistSlot homeSlot;
     protected Collider[] myColliders;
 
-    // 静态列表：跟踪所有腰带物品
-    protected static List<WaistSlotItem> allWaistItems = new List<WaistSlotItem>();
-    
-    // 🔥 修改：不再用 ignoredColliders 计数，而是基于对方状态的动态判断
-    // 但我们需要跟踪当前忽略的碰撞器以便清理
-    protected HashSet<Collider> ignoredColliders = new HashSet<Collider>();
-
     // Socket 宽容期计时
     protected float lastReleaseTime = -999f;
     protected bool isInGracePeriod => Time.time - lastReleaseTime < socketGracePeriod;
 
-    // 事件驱动：回家协程控制
+    // 协程控制
     protected Coroutine pendingReturnCoroutine = null;
     protected bool isPendingReturn => pendingReturnCoroutine != null;
 
-    // Filter 接口实现
-    public bool canProcess => true;
+    // 状态标记
+    protected bool forceReturnOnSocketDisconnect = false;
+    protected bool isGrabbedByHand = false;
+
+    // 🔥 新增：标记是否正在Socket交互中（解决第一次吸附问题）
+    protected bool isInSceneSocket = false;
+
+    // Filter 接口
+    public bool canProcess => isActiveAndEnabled && isInitialized; // 🔥 关键：必须初始化后才处理
+
+    //Audio
+    private AudioManager audioManager;
 
     protected virtual void Awake()
     {
+        audioManager = this.GetUtility<AudioManager>();
         grab = GetComponent<XRGrabInteractable>();
         rb = GetComponent<Rigidbody>();
         originalParent = transform.parent;
@@ -73,25 +75,82 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         if (grab.attachTransform == null)
             grab.attachTransform = transform;
 
-        if (!allWaistItems.Contains(this))
-            allWaistItems.Add(this);
+        SetupTagAndCollision();
 
         if (restrictSocketInteractionToGrabbedOnly)
         {
             grab.hoverFilters.Add(this);
             grab.selectFilters.Add(this);
         }
+    }
 
-        // 🔥 订阅全局插槽状态变化事件
-        SubscribeToSlotStateChanges();
+    protected virtual void SetupTagAndCollision()
+    {
+        if (!string.IsNullOrEmpty(waistSlotItemTag))
+        {
+            gameObject.tag = waistSlotItemTag;
+        }
+
+        if (ignoreCollisionWithSlotItems && !string.IsNullOrEmpty(waistSlotItemTag))
+        {
+            IgnoreCollisionWithSameTag();
+        }
+    }
+
+    protected virtual void IgnoreCollisionWithSameTag()
+    {
+        GameObject[] sameTagObjects = GameObject.FindGameObjectsWithTag(waistSlotItemTag);
+
+        foreach (var otherObj in sameTagObjects)
+        {
+            if (otherObj == gameObject) continue;
+
+            Collider[] otherColliders = otherObj.GetComponentsInChildren<Collider>(true)
+                .Where(c => !c.isTrigger)
+                .ToArray();
+
+            foreach (var myCol in myColliders)
+            {
+                if (myCol == null) continue;
+                foreach (var otherCol in otherColliders)
+                {
+                    if (otherCol == null) continue;
+                    Physics.IgnoreCollision(myCol, otherCol, true);
+                }
+            }
+        }
+    }
+
+    protected virtual void RestoreCollisionWithSameTag()
+    {
+        if (string.IsNullOrEmpty(waistSlotItemTag)) return;
+
+        GameObject[] sameTagObjects = GameObject.FindGameObjectsWithTag(waistSlotItemTag);
+
+        foreach (var otherObj in sameTagObjects)
+        {
+            if (otherObj == gameObject) continue;
+
+            Collider[] otherColliders = otherObj.GetComponentsInChildren<Collider>(true)
+                .Where(c => !c.isTrigger)
+                .ToArray();
+
+            foreach (var myCol in myColliders)
+            {
+                if (myCol == null) continue;
+                foreach (var otherCol in otherColliders)
+                {
+                    if (otherCol == null) continue;
+                    Physics.IgnoreCollision(myCol, otherCol, false);
+                }
+            }
+        }
     }
 
     protected virtual void OnDestroy()
     {
-        // 🔥 清理时恢复所有碰撞
-        RestoreAllCollisions();
-        allWaistItems.Remove(this);
-        
+        RestoreCollisionWithSameTag();
+
         if (grab != null)
         {
             grab.hoverFilters.Remove(this);
@@ -99,7 +158,6 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         }
 
         UnsubscribeFromSocketEvents();
-        UnsubscribeFromSlotStateChanges();
     }
 
     protected virtual void Start()
@@ -147,108 +205,14 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         isInitialized = true;
     }
 
-    #region 🔥 核心：全局插槽状态管理
-
-    // 静态事件：任何物品的插槽状态变化时触发
-    public static event System.Action<WaistSlotItem, bool> OnAnySlotStateChanged;
-
-    /// <summary>
-    /// 订阅插槽状态变化
-    /// </summary>
-    protected virtual void SubscribeToSlotStateChanges()
-    {
-        OnAnySlotStateChanged += OnOtherItemSlotStateChanged;
-    }
-
-    protected virtual void UnsubscribeFromSlotStateChanges()
-    {
-        OnAnySlotStateChanged -= OnOtherItemSlotStateChanged;
-    }
-
-    /// <summary>
-    /// 🔥 当其他物品的插槽状态变化时，更新碰撞关系
-    /// </summary>
-    protected virtual void OnOtherItemSlotStateChanged(WaistSlotItem item, bool enteredSlot)
-    {
-        if (item == this) return; // 忽略自己
-        
-        // 如果对方进入插槽，我忽略它
-        // 如果对方离开插槽，我恢复与它的碰撞（如果我也在外面）
-        UpdateCollisionWithItem(item);
-    }
-
-    /// <summary>
-    /// 🔥 更新与特定物品的碰撞关系（基于双方状态）
-    /// </summary>
-    protected virtual void UpdateCollisionWithItem(WaistSlotItem other)
-    {
-        if (!ignoreCollisionWithSlotItems) return;
-        if (other?.myColliders == null) return;
-
-        // 规则：只要有一方在插槽内，双方就不碰撞
-        bool shouldIgnore = this.isInSlot || other.isInSlot;
-
-        foreach (var myCol in myColliders)
-        {
-            if (myCol == null) continue;
-            foreach (var otherCol in other.myColliders)
-            {
-                if (otherCol == null) continue;
-                
-                Physics.IgnoreCollision(myCol, otherCol, shouldIgnore);
-                
-                if (shouldIgnore)
-                    ignoredColliders.Add(otherCol);
-                else
-                    ignoredColliders.Remove(otherCol);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 🔥 更新与所有物品的碰撞关系
-    /// </summary>
-    protected virtual void UpdateAllCollisionRelationships()
-    {
-        if (!ignoreCollisionWithSlotItems) return;
-
-        foreach (var otherItem in allWaistItems)
-        {
-            if (otherItem == this || otherItem == null) continue;
-            UpdateCollisionWithItem(otherItem);
-        }
-    }
-
-    /// <summary>
-    /// 🔥 恢复所有碰撞（清理时用）
-    /// </summary>
-    protected virtual void RestoreAllCollisions()
-    {
-        foreach (var otherItem in allWaistItems)
-        {
-            if (otherItem?.myColliders == null) continue;
-            
-            foreach (var myCol in myColliders)
-            {
-                if (myCol == null) continue;
-                foreach (var otherCol in otherItem.myColliders)
-                {
-                    if (otherCol == null) continue;
-                    Physics.IgnoreCollision(myCol, otherCol, false);
-                }
-            }
-        }
-        ignoredColliders.Clear();
-    }
-
-    #endregion
-
-    #region 事件驱动核心 - Socket 事件监听
+    #region Socket 事件监听
 
     protected virtual void SubscribeToSocketEvents()
     {
         grab.selectEntered.AddListener(OnAnySelectEntered);
+        grab.selectExited.AddListener(OnAnySelectExited);
         grab.hoverEntered.AddListener(OnAnyHoverEntered);
+        grab.hoverExited.AddListener(OnAnyHoverExited); // 🔥 新增：监听HoverExit
     }
 
     protected virtual void UnsubscribeFromSocketEvents()
@@ -256,7 +220,9 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         if (grab != null)
         {
             grab.selectEntered.RemoveListener(OnAnySelectEntered);
+            grab.selectExited.RemoveListener(OnAnySelectExited);
             grab.hoverEntered.RemoveListener(OnAnyHoverEntered);
+            grab.hoverExited.RemoveListener(OnAnyHoverExited);
         }
     }
 
@@ -264,60 +230,94 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     {
         if (args.interactorObject is XRSocketInteractor socket)
         {
-            OnSocketAttached(socket);
+            // 🔥 关键：检查是否是家的Socket
+            bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+
+            if (!isHomeSocket)
+            {
+                isInSceneSocket = true; // 🔥 标记进入场景Socket
+                CancelPendingReturn($"被场景Socket [{socket.name}] 吸附");
+
+                if (homeSlot != null && homeSlot.currentItem == this)
+                {
+                    WaistInventory.Instance?.ReleaseSlot(homeSlot);
+                }
+            }
+            else
+            {
+                Debug.Log($"[{name}] 成功回到腰带插槽 [{homeSlotID}]");
+            }
         }
+        else if (IsHandInteractor(args.interactorObject))
+        {
+            isGrabbedByHand = true;
+        }
+    }
+
+    protected virtual void OnAnySelectExited(SelectExitEventArgs args)
+    {
+        if (args.interactorObject is XRSocketInteractor socket)
+        {
+            bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+
+            if (!isHomeSocket)
+            {
+                Debug.Log($"[{name}] 从场景Socket [{socket.name}] 断开");
+                isInSceneSocket = false; // 🔥 重置标记
+
+                // 🔥 关键：强制立即回家
+                forceReturnOnSocketDisconnect = true;
+
+                // 立即启动物理
+                if (rb != null)
+                {
+                    rb.isKinematic = false;
+                    rb.useGravity = true;
+                    rb.WakeUp();
+                }
+
+                // 立即启动回家（不等待）
+                if (homeSlot != null && !isInSlot)
+                {
+                    CancelPendingReturn("从Socket断开，强制立即回家");
+                    StartCoroutine(ForceReturnHomeImmediate());
+                }
+            }
+        }
+        else if (IsHandInteractor(args.interactorObject))
+        {
+            isGrabbedByHand = false;
+        }
+    }
+
+    protected virtual bool IsHandInteractor(IXRInteractor interactor)
+    {
+        return interactor is XRDirectInteractor || interactor is XRRayInteractor;
     }
 
     protected virtual void OnAnyHoverEntered(HoverEnterEventArgs args)
     {
         if (args.interactorObject is XRSocketInteractor socket && isPendingReturn)
         {
-            OnSocketHoverStarted(socket);
-        }
-    }
-
-    protected virtual void OnSocketAttached(XRSocketInteractor socket)
-    {
-        bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
-        
-        if (!isHomeSocket)
-        {
-            CancelPendingReturn($"被场景Socket [{socket.name}] 吸附");
-            
-            if (homeSlot != null && homeSlot.currentItem == this)
+            bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+            if (!isHomeSocket)
             {
-                WaistInventory.Instance?.ReleaseSlot(homeSlot);
-                homeSlot = null;
+                PausePendingReturn($"进入场景Socket [{socket.name}] 范围");
             }
         }
-        else
-        {
-            Debug.Log($"[{name}] 成功回到腰带插槽 [{homeSlotID}]");
-        }
     }
 
-    protected virtual void OnSocketHoverStarted(XRSocketInteractor socket)
+    // 🔥 新增：监听HoverExit，恢复回家计时
+    protected virtual void OnAnyHoverExited(HoverExitEventArgs args)
     {
-        bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
-        
-        if (!isHomeSocket)
+        if (args.interactorObject is XRSocketInteractor socket)
         {
-            PausePendingReturn($"进入场景Socket [{socket.name}] 范围");
-        }
-    }
-
-    protected virtual bool IsHoveredByAnySceneSocket()
-    {
-        foreach (var interactor in grab.interactorsHovering)
-        {
-            if (interactor is XRSocketInteractor socket)
+            bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+            if (!isHomeSocket && !isInSceneSocket && !isGrabbedByHand && homeSlot != null && !isInSlot)
             {
-                bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
-                if (!isHomeSocket)
-                    return true;
+                ResumePendingReturn($"离开场景Socket [{socket.name}] 范围");
             }
         }
-        return false;
     }
 
     #endregion
@@ -326,6 +326,9 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
 
     protected virtual void StartPendingReturn()
     {
+        if (forceReturnOnSocketDisconnect) return;
+        if (isInSceneSocket) return; // 🔥 关键：如果在场景Socket中，不启动回家
+
         CancelPendingReturn("启动新的回家计时");
         pendingReturnCoroutine = StartCoroutine(PendingReturnCoroutine());
         Debug.Log($"[{name}] 启动回家计时 ({delayTime}秒)");
@@ -339,6 +342,7 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
             pendingReturnCoroutine = null;
             Debug.Log($"[{name}] 取消回家: {reason}");
         }
+
         isReturning = false;
     }
 
@@ -354,6 +358,9 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
 
     protected virtual void ResumePendingReturn(string reason)
     {
+        if (forceReturnOnSocketDisconnect) return;
+        if (isInSceneSocket) return; // 🔥 关键：如果在场景Socket中，不恢复
+
         if (!isPendingReturn && !grab.isSelected && homeSlot != null && !isInSlot)
         {
             pendingReturnCoroutine = StartCoroutine(PendingReturnCoroutine());
@@ -364,7 +371,7 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     protected virtual IEnumerator PendingReturnCoroutine()
     {
         yield return null;
-        
+
         if (rb != null)
         {
             rb.isKinematic = false;
@@ -378,7 +385,7 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         if (CanReturnHome())
         {
             pendingReturnCoroutine = null;
-            StartCoroutine(AutoSnapBack());
+            yield return StartCoroutine(ExecuteReturnHome());
         }
         else
         {
@@ -387,15 +394,110 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         }
     }
 
+    // 🔥 重写：强制立即回家，修复卡在半空问题
+    protected virtual IEnumerator ForceReturnHomeImmediate()
+    {
+        Debug.Log($"[{name}] 🔥 强制立即回家启动");
+
+        // 等待一帧确保状态稳定
+        yield return null;
+
+        // 如果被手抓住，取消
+        if (isGrabbedByHand)
+        {
+            Debug.Log($"[{name}] 强制回家取消：被手抓住");
+            forceReturnOnSocketDisconnect = false;
+            yield break;
+        }
+
+        // 如果已经回到家，直接结束
+        if (isInSlot || homeSlot == null)
+        {
+            forceReturnOnSocketDisconnect = false;
+            yield break;
+        }
+
+        // 🔥 关键：等待物理系统稳定
+        yield return new WaitForFixedUpdate();
+
+        // 再次检查状态
+        if (isGrabbedByHand || isInSlot)
+        {
+            forceReturnOnSocketDisconnect = false;
+            yield break;
+        }
+
+        yield return StartCoroutine(ExecuteReturnHome());
+    }
+
+    // 🔥 重写：修复卡在半空的回家执行逻辑
+    protected virtual IEnumerator ExecuteReturnHome()
+    {
+        if (homeSlot == null) yield break;
+
+        isReturning = true;
+
+        // 🔥 关键：先解绑，再设置物理，最后设置位置和父级
+        Transform targetParent = homeSlot.attachPoint;
+        Vector3 targetPos = targetParent.position;
+        Quaternion targetRot = targetParent.rotation;
+
+        // 1. 先解除当前父级（关键！避免Transform冲突）
+        transform.SetParent(null, true);
+
+        // 2. 等待一帧让Transform系统更新
+        yield return null;
+
+        // 3. 设置物理状态为Kinematic（必须在设置parent之前！）
+        if (rb != null)
+        {
+            rb.isKinematic = true;
+            rb.useGravity = false;
+            rb.velocity = Vector3.zero;
+            rb.angularVelocity = Vector3.zero;
+        }
+
+        // 4. 等待物理系统处理
+        yield return new WaitForFixedUpdate();
+
+        // 5. 设置位置和旋转（此时无父级，世界坐标）
+        transform.position = targetPos;
+        transform.rotation = targetRot;
+
+        // 6. 设置父级
+        transform.SetParent(targetParent, true);
+
+        // 7. 重置本地坐标
+        transform.localPosition = Vector3.zero;
+        transform.localRotation = Quaternion.identity;
+        transform.localScale = originalScale;
+
+        // 8. 占用槽位
+        WaistInventory.Instance?.OccupySlot(homeSlot, this);
+
+        isInSlot = true;
+        isReturning = false;
+        forceReturnOnSocketDisconnect = false;
+        isInSceneSocket = false;
+
+        Debug.Log($"[{name}] 成功回到腰带插槽 [{homeSlotID}]");
+    }
+
     protected virtual bool CanReturnHome()
     {
+        if (forceReturnOnSocketDisconnect)
+        {
+            return homeSlot != null && !isInSlot && !isGrabbedByHand && !isInSceneSocket;
+        }
+
         if (!isInitialized) return false;
         if (grab.isSelected) return false;
         if (homeSlot == null) return false;
         if (isInSlot) return false;
+        if (isInSceneSocket) return false; // 🔥 关键检查
         if (IsAttachedToSceneSocket()) return false;
         if (IsHoveredByAnySceneSocket()) return false;
-        
+
         return true;
     }
 
@@ -410,57 +512,64 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
                     return true;
             }
         }
+
+        return false;
+    }
+
+    protected virtual bool IsHoveredByAnySceneSocket()
+    {
+        foreach (var interactor in grab.interactorsHovering)
+        {
+            if (interactor is XRSocketInteractor socket)
+            {
+                bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+                if (!isHomeSocket)
+                    return true;
+            }
+        }
+
         return false;
     }
 
     #endregion
 
-    #region Filter 接口实现
+    #region Filter 接口实现 - 🔥 关键修复
 
     public bool Process(IXRHoverInteractor interactor, IXRHoverInteractable interactable)
     {
-        if (interactable is XRBaseInteractable baseInteractable)
+        // 🔥 关键：如果已经初始化且正在与场景Socket交互，允许
+        if (isInSceneSocket) return true;
+
+        // 🔥 关键：如果正在被手抓住，允许Socket hover（用于吸附）
+        if (isGrabbedByHand) return true;
+
+        // 🔥 关键：如果在宽容期内，允许
+        if (isInGracePeriod && !isInSlot) return true;
+
+        // 🔥 关键：如果已经在家的槽位中，禁止其他Socket hover
+        if (isInSlot && interactor is XRSocketInteractor socket)
         {
-            if (baseInteractable.isHovered && IsInteractorHovering(baseInteractable, interactor))
-            {
-                return true;
-            }
+            bool isHomeSocket = (homeSlot != null && socket == homeSlot.GetComponent<XRSocketInteractor>());
+            return isHomeSocket;
         }
-        
+
+        // 其他情况：只有被手抓住时才允许Socket交互
         return CanInteractWithSocket(interactor);
     }
 
     public bool Process(IXRSelectInteractor interactor, IXRSelectInteractable interactable)
     {
-        if (interactable is XRBaseInteractable baseInteractable)
-        {
-            if (baseInteractable.isSelected && IsInteractorSelecting(baseInteractable, interactor))
-            {
-                return true;
-            }
-        }
-        
+        // 🔥 关键：如果已经初始化且正在与场景Socket交互，允许
+        if (isInSceneSocket) return true;
+
+        // 🔥 关键：如果正在被手抓住，允许Socket select
+        if (isGrabbedByHand) return true;
+
+        // 🔥 关键：如果在宽容期内，允许
+        if (isInGracePeriod && !isInSlot) return true;
+
+        // 其他情况
         return CanInteractWithSocket(interactor);
-    }
-
-    private bool IsInteractorSelecting(XRBaseInteractable interactable, IXRInteractor interactor)
-    {
-        foreach (var selectingInteractor in interactable.interactorsSelecting)
-        {
-            if (selectingInteractor == interactor)
-                return true;
-        }
-        return false;
-    }
-
-    private bool IsInteractorHovering(XRBaseInteractable interactable, IXRInteractor interactor)
-    {
-        foreach (var hoveringInteractor in interactable.interactorsHovering)
-        {
-            if (hoveringInteractor == interactor)
-                return true;
-        }
-        return false;
     }
 
     protected virtual bool CanInteractWithSocket(IXRInteractor interactor)
@@ -471,38 +580,29 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         if (!(interactor is XRSocketInteractor))
             return true;
 
-        bool isGrabbedByHand = grab.isSelected && IsGrabbedByHandInteractor();
-        bool inGracePeriod = isInGracePeriod && !isInSlot;
-        
-        return isGrabbedByHand || inGracePeriod;
-    }
-
-    protected virtual bool IsGrabbedByHandInteractor()
-    {
-        foreach (var selectingInteractor in grab.interactorsSelecting)
-        {
-            if (selectingInteractor is XRDirectInteractor || selectingInteractor is XRRayInteractor)
-                return true;
-        }
-        return false;
+        // 🔥 关键：使用多个条件判断，更宽松
+        return isGrabbedByHand || (isInGracePeriod && !isInSlot) || isInSceneSocket;
     }
 
     #endregion
 
-    #region 🔥 修改后的接口实现 - 基于全局状态的碰撞管理
+    #region 接口实现
 
     void IWaistSlotItem.SnapToSlot(WaistSlot slot)
     {
         if (slot == null || slot.attachPoint == null) return;
 
         homeSlot = slot;
+        isInSlot = true;
+        isInSceneSocket = false;
+        forceReturnOnSocketDisconnect = false;
 
+        // 🔥 关键：先设置父级，再设置物理
         transform.SetParent(slot.attachPoint, false);
         transform.localPosition = Vector3.zero;
         transform.localRotation = Quaternion.identity;
         transform.localScale = originalScale;
 
-        // 冻结物理
         if (rb != null)
         {
             rb.isKinematic = true;
@@ -510,9 +610,6 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
         }
-
-        // 🔥 进入插槽状态
-        SetInSlotState(true);
     }
 
     void IWaistSlotItem.OnGrabFromSlot()
@@ -524,40 +621,19 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
 
         transform.SetParent(originalParent, true);
         transform.localScale = originalScale;
+        isInSlot = false;
 
-        // 启用物理
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.useGravity = true;
             rb.WakeUp();
         }
-
-        // 🔥 离开插槽状态（但保持与插槽内物品的碰撞忽略）
-        SetInSlotState(false);
     }
 
     void IWaistSlotItem.ReleaseSlot()
     {
         homeSlot = null;
-    }
-
-    /// <summary>
-    /// 🔥 核心：设置插槽状态，并通知所有其他物品更新碰撞关系
-    /// </summary>
-    protected virtual void SetInSlotState(bool inSlot)
-    {
-        if (isInSlot == inSlot) return; // 无变化
-        
-        isInSlot = inSlot;
-        
-        // 🔥 更新与所有物品的碰撞关系
-        UpdateAllCollisionRelationships();
-        
-        // 🔥 触发全局事件，通知其他物品更新与我的碰撞关系
-        OnAnySlotStateChanged?.Invoke(this, inSlot);
-        
-        Debug.Log($"[{name}] 插槽状态: {(inSlot ? "进入" : "离开")}，碰撞关系已更新");
     }
 
     #endregion
@@ -568,6 +644,12 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     {
         if (!isInitialized) return;
 
+        isGrabbedByHand = IsHandInteractor(args.interactorObject);
+        if (isGrabbedByHand)
+        {
+            audioManager.PlayGrabItemInWaistSlotsSound();
+        }
+
         CancelPendingReturn("物品被抓住");
 
         if (homeSlot != null && homeSlot.currentItem == this)
@@ -576,8 +658,7 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
         }
         else if (isInSlot)
         {
-            // 🔥 通过 SetInSlotState 离开插槽，自动处理碰撞关系
-            SetInSlotState(false);
+            isInSlot = false;
         }
     }
 
@@ -585,58 +666,24 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
     {
         if (!isInitialized) return;
 
+        bool wasHand = IsHandInteractor(args.interactorObject);
+        if (wasHand)
+        {
+            isGrabbedByHand = false;
+        }
+
         lastReleaseTime = Time.time;
 
-        // 🔥 注意：松手时不恢复任何碰撞，保持与插槽内物品的忽略关系
-        
-        if (homeSlot != null && !isInSlot)
+        // 🔥 关键：如果是从Socket释放，不处理（由OnAnySelectExited处理）
+        if (args.interactorObject is XRSocketInteractor) return;
+
+        // 🔥 关键：如果正在强制回家，不干扰
+        if (forceReturnOnSocketDisconnect) return;
+
+        if (homeSlot != null && !isInSlot && !isInSceneSocket)
         {
             StartPendingReturn();
         }
-    }
-
-    #endregion
-
-    #region 回槽逻辑
-
-    private IEnumerator AutoSnapBack()
-    {
-        if (homeSlot == null) yield break;
-
-        if (!CanReturnHome())
-        {
-            Debug.Log($"[{name}] AutoSnapBack 最终检查失败，取消回家");
-            yield break;
-        }
-
-        isReturning = true;
-
-        if (rb != null)
-        {
-            rb.isKinematic = true;
-            rb.velocity = Vector3.zero;
-            rb.angularVelocity = Vector3.zero;
-        }
-
-        // 🔥 注意：回家过程中不恢复碰撞，保持与插槽内物品的忽略关系
-        
-        transform.SetParent(null, true);
-        transform.position = homeSlot.attachPoint.position;
-        transform.rotation = homeSlot.attachPoint.rotation;
-        
-        transform.SetParent(homeSlot.attachPoint, false);
-        transform.localPosition = Vector3.zero;
-        transform.localRotation = Quaternion.identity;
-        transform.localScale = originalScale;
-
-        WaistInventory.Instance?.OccupySlot(homeSlot, this);
-
-        // 🔥 通过 SetInSlotState 进入插槽，自动处理碰撞关系
-        SetInSlotState(true);
-
-        isReturning = false;
-        
-        Debug.Log($"[{name}] 成功回到腰带插槽 [{homeSlotID}]");
     }
 
     #endregion
@@ -645,17 +692,34 @@ public class WaistSlotItem : MonoBehaviour, IWaistSlotItem, IXRHoverFilter, IXRS
 
     protected virtual void OnDrawGizmosSelected()
     {
-        // 可视化当前忽略的碰撞
-        if (ignoredColliders.Count > 0)
+        if (!string.IsNullOrEmpty(waistSlotItemTag))
         {
             Gizmos.color = Color.cyan;
-            foreach (var col in ignoredColliders)
+            GameObject[] sameTagObjects = GameObject.FindGameObjectsWithTag(waistSlotItemTag);
+            foreach (var obj in sameTagObjects)
             {
-                if (col != null)
-                    Gizmos.DrawLine(transform.position, col.transform.position);
+                if (obj != gameObject)
+                    Gizmos.DrawLine(transform.position, obj.transform.position);
             }
+        }
+
+        if (forceReturnOnSocketDisconnect)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(transform.position, 0.1f);
+        }
+
+        if (isInSceneSocket)
+        {
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(transform.position + Vector3.up * 0.1f, 0.05f);
         }
     }
 
     #endregion
+
+    public IArchitecture GetArchitecture()
+    {
+        return RailGameApp.Interface;
+    }
 }

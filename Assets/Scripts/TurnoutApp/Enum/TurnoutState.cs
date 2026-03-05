@@ -28,7 +28,8 @@ public enum TurnoutID
 
 public enum RedLightPosition
 {
-    下行,
+    下行正线,
+    下行入库,
     上行,
     折返线1道,
     折返线2道

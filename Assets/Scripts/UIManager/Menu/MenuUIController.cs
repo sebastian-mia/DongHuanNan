@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
 using QFramework;
+using Record.GameRecord.Command;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ public class MenuUIController : MonoBehaviour, IController
     private readonly string UserIdPanelTag = "UserIdPanel";
     private readonly string TurnoutProjectScorePanelTag = "TurnoutProjectScorePanel";
     private readonly string ToggleProjectScorePanelTag = "ToggleProjectScorePanel";
+    private readonly string InfoPanelTag = "InfoPanel";
 
 
     //Panel
@@ -29,6 +31,7 @@ public class MenuUIController : MonoBehaviour, IController
     private TurnoutProjectScorePanel turnoutProjectScorePanel;
     private LocomotionModePanel locomotionModePanel;
     private UserIdPanel userIdPanel;
+    private InfoPanel infoPanel;
 
     //Index
     private int turnoutProjectButtonIndex;
@@ -50,7 +53,13 @@ public class MenuUIController : MonoBehaviour, IController
             startMenuPanel.startGameButton.onClick.AddListener(ShowSetUserIdPanel);
             startMenuPanel.settingButton.onClick.AddListener(ShowLocomotionModePanel);
             startMenuPanel.boardButton.onClick.AddListener(ShowToggleProjectScorePanel);
+            startMenuPanel.infoButton.onClick.AddListener(ShowInfoPanel);
         }
+    }
+
+    private void ShowInfoPanel()
+    {
+        infoPanel = UIManager.Instance.PushUI(InfoPanelTag).GetComponent<InfoPanel>();
     }
 
     private void ShowLocomotionModePanel()
@@ -129,6 +138,7 @@ public class MenuUIController : MonoBehaviour, IController
 
     private void ShowTurnoutProjectPanel()
     {
+        this.SendCommand<SetCurrentProjectIdCommand>();
         turnoutProjectPanel = UIManager.Instance.PushUI(TurnoutProjectPanelTag).GetComponent<TurnoutProjectPanel>();
         if (turnoutProjectPanel != null)
         {

@@ -7,18 +7,23 @@ public class AudioManager : IUtility
 {
     private string buttonHoverPath = $"resources://Voice/Hover";
     private string buttonClickPath = $"resources://Voice/Click";
+    private string mainBackGroundMusicPath = $"resources://Voice/MainBackground";
     private string turnoutBackGroundMusicPath = $"resources://Voice/Turnout";
+    private string redLightPutDownSoundPath = $"resources://Voice/红闪灯";
     private string turnoutMachineWorkingSoundPath = $"resources://Voice/转辙机转动声音";
     private string turnoutMachineEndingSoundPath = $"resources://Voice/转辙机落槽声音";
     private string turnoutMachineCutPowerSoundPath = $"resources://Voice/转辙机断电声音";
+    private string turnoutMachineHandlerSoundPath = $"resources://Voice/插入手摇把";
+    private string grabItemInWaistSlotsSoundPath = $"resources://Voice/从插槽拿取物品";
+    private string turnoutMachineLockSoundPath = $"resources://Voice/钩锁器";
 
     private string gameStartSoundPath = $"resources://Voice/主界面欢迎";
     private string gameStartSoundSecondPath = $"resources://Voice/主界面欢迎2";
     private string waitLongTimeSoundPath = $"resources://Voice/时间过长";
     private string turnoutProjectCompletePerfectSoundPath = $"resources://Voice/完美完成";
     private string turnoutProjectCompleteSoundPath = $"resources://Voice/完成（有错误）";
-    private string turnoutProjectRouteFaultSoundPath = $"resources://Voice/转辙机断电声音";
-    private string turnoutProjectRedLightFaultSoundPath = $"resources://Voice/转辙机断电声音";
+    private string turnoutProjectRouteFaultSoundPath = $"resources://Voice/进路错误";
+    private string turnoutProjectRedLightFaultSoundPath = $"resources://Voice/红闪灯错误位置";
     private string turnoutProjectByeSoundPath = $"resources://Voice/再见";
 
     //Queue
@@ -41,6 +46,11 @@ public class AudioManager : IUtility
         PlayBackGroundMusic(turnoutBackGroundMusicPath);
     }
 
+    public void PlayMainBackGroundMusic()
+    {
+        PlayBackGroundMusic(mainBackGroundMusicPath);
+    }
+
     public void PlayturnoutMachineEndingSound()
     {
         PlaySound(turnoutMachineEndingSoundPath);
@@ -48,7 +58,7 @@ public class AudioManager : IUtility
 
     public void PlayturnoutMachineWorkingSound()
     {
-        AudioKit.SoundFrameCountForIgnoreSameSound = 10;
+        AudioKit.SoundFrameCountForIgnoreSameSound = 120;
         PlaySound(turnoutMachineWorkingSoundPath);
     }
 
@@ -100,6 +110,26 @@ public class AudioManager : IUtility
     public void PlayBobVoice(string path)
     {
         AudioKit.PlayVoice(path);
+    }
+
+    public void PlayHandlerSound()
+    {
+        AudioKit.PlaySound(turnoutMachineHandlerSoundPath);
+    }
+
+    public void PlayLockSound()
+    {
+        AudioKit.PlaySound(turnoutMachineLockSoundPath);
+    }
+
+    public void PlayPutDownRedLightSound()
+    {
+        AudioKit.PlaySound(redLightPutDownSoundPath);
+    }
+
+    public void PlayGrabItemInWaistSlotsSound()
+    {
+        AudioKit.PlaySound(grabItemInWaistSlotsSoundPath);
     }
 
 

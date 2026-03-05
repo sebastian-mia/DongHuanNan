@@ -1,13 +1,8 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Net.Sockets;
 using UnityEngine;
 using QFramework;
 using TMPro;
-using TreeEditor;
 using UnityEngine.InputSystem;
-using UnityEngine.UI;
 
 public class TurnoutGameManager : MonoBehaviour, IController
 {
@@ -47,10 +42,17 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
     //Audio
     private AudioManager audioManager;
-    public float waitVoiceTime = 3f;
+    public float waitVoiceTime = 1f;
     public float waitVoiceIntervalTime = 1f;
     public float longTimeWaitVoiceMinuteTime = 5f;
     private bool nodeHasFault;
+
+    //Counter
+    private int second;
+    [SerializeField] private TMP_Text counterTimeText;
+    private string counterTimeName = "CounterTime";
+    private string counterTimeString = "00:00:00";
+    private Coroutine counterTimeCoroutine;
 
 
     void Awake()
@@ -69,11 +71,14 @@ public class TurnoutGameManager : MonoBehaviour, IController
             if (turnoutModel.scorePanelIndex <= 0)
             {
                 UIManager.Instance.HideUI(targetRoute);
+                StopCoroutine(counterTimeCoroutine);
+                this.SendCommand<SetCounterTimeCommand>(new SetCounterTimeCommand(counterTimeString));
                 var scorePanel = UIManager.Instance.ShowUI(scorePanelName);
                 var turnoutScoreUI = scorePanel.GetComponent<TrunoutScoreUI>();
                 if (turnoutScoreUI != null)
                 {
                     turnoutScoreUI.subProjectName.text = currentRouteName;
+                    turnoutScoreUI.counterTime.text = counterTimeString;
                     turnoutScoreUI.ShowNodeValue();
                 }
 
@@ -128,13 +133,13 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private void CreateTargetRoute()
     {
         randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
-        // randomNum = 6;
+        // randomNum = 1;
         targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:邱隘东下行至东环南路下行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:邱隘东下行至东环南路下行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:邱隘东下行至东环南路下行进路";
             this.SendCommand<PerpareDownSideToDownSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -143,7 +148,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路下行至折1道进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折1道进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:东环南路下行至折1道进路";
             this.SendCommand<PerpareDownSideToTranslate1RouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -152,7 +157,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路下行至折2道进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路下行至折2道进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:东环南路下行至折2道进路";
             this.SendCommand<PerpareDownSideToTranslate2RouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -161,7 +166,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折1道至东环南路下行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路下行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:折1道至东环南路下行进路";
             this.SendCommand<PerpareTranslate1ToDownSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -170,7 +175,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折2道至东环南路下行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路下行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:折2道至东环南路下行进路";
             this.SendCommand<PerpareTranslate2ToDownSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -179,7 +184,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至邱隘东上行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至邱隘东上行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:东环南路上行至邱隘东上行进路";
             this.SendCommand<PerpareUpSideToUpSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -188,7 +193,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至折1道进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折1道进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:东环南路上行至折1道进路";
             this.SendCommand<PerpareUpSideToTranslate1RouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -197,7 +202,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:东环南路上行至折2道进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:东环南路上行至折2道进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:东环南路上行至折2道进路";
             this.SendCommand<PerpareUpSideToTranslate2RouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -206,7 +211,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折1道至东环南路上行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折1道至东环南路上行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:折1道至东环南路上行进路";
             this.SendCommand<PerpareTranslate1ToUpSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -215,7 +220,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
         {
             UITweenAnimation.TypewriterRichText(targetRoute.GetComponent<TextMeshProUGUI>(), "请准备:折2道至东环南路上行进路", 2f);
             // targetRoute.GetComponent<TextMeshProUGUI>().text = "请准备:折2道至东环南路上行进路";
-            currentRouteName = targetRoute.GetComponent<TextMeshProUGUI>().text;
+            currentRouteName = "请准备:折2道至东环南路上行进路";
             this.SendCommand<PerpareTranslate2ToUpSideRouteCommand>();
             this.SendCommand<SetCurrentSubProjectNameCommand>(new SetCurrentSubProjectNameCommand(currentRouteName));
         }
@@ -315,6 +320,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private IEnumerator PlayTurnoutProjectStartVoice()
     {
         yield return new WaitForSeconds(waitVoiceTime);
+        counterTimeCoroutine = StartCoroutine(counterTimeName);
         if (currentSpawnPointIsDown)
         {
             audioManager.EnqueueVoice(DongHuanNanRouteVoicePath.turnoutProjectWelcomeDownTailSoundPath);
@@ -385,7 +391,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     {
         for (int i = 0; i < turnoutModel.nodeValues.Count; i++)
         {
-            if (turnoutModel.nodeValues[i].nodeName.Equals(RouteNodeTag.红闪灯))
+            if (turnoutModel.nodeValues[i].nodeName.Equals(RouteNodeTag.红闪灯.ToString()))
             {
                 if (!turnoutModel.nodeValues[i].isConsistence)
                 {
@@ -416,6 +422,25 @@ public class TurnoutGameManager : MonoBehaviour, IController
             audioManager.PlayVoiceInPerfectComplete();
             return;
         }
+    }
+
+    private IEnumerator CounterTime()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(1f);
+            second++;
+            counterTimeString = FormatTime();
+        }
+    }
+
+    private string FormatTime()
+    {
+        int hours = second / 3600;
+        int mins = (second % 3600) / 60;
+        int secs = second % 60;
+        counterTimeText.text = hours.ToString("00") + ":" + mins.ToString("00") + ":" + secs.ToString("00");
+        return mins.ToString("00") + ":" + secs.ToString("00");
     }
 
     public IArchitecture GetArchitecture()

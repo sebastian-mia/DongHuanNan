@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using QFramework;
@@ -19,12 +20,13 @@ public class TurnoutProjectScorePanel : MonoBehaviour, IController
     private List<TMP_Dropdown.OptionData> lineOptions = new List<TMP_Dropdown.OptionData>();
     private List<TMP_Dropdown.OptionData> stationOptions = new List<TMP_Dropdown.OptionData>();
 
+    private int buttonIndex;
+
     private void OnEnable()
     {
         turnoutDatabaseManager = this.GetUtility<TurnoutDatabaseManager>();
         //
         InitLineAndStationOptions();
-        lineDropdown.onValueChanged.AddListener(e => { ShowStationOptions(e); });
         //
 
         timeFormatter = this.GetUtility<TimeFormatter>();
@@ -38,15 +40,20 @@ public class TurnoutProjectScorePanel : MonoBehaviour, IController
             Debug.Log("projectId为空");
         }
 
-
-        if (searchButton != null)
+        if (buttonIndex < 1)
         {
-            searchButton.onClick.AddListener(SearchPlayerValue);
-        }
+            lineDropdown.onValueChanged.AddListener(e => { ShowStationOptions(e); });
+            if (searchButton != null)
+            {
+                searchButton.onClick.AddListener(SearchPlayerValue);
+            }
 
-        if (returnPerUIButton != null)
-        {
-            returnPerUIButton.onClick.AddListener(ReturnPrePanel);
+            if (returnPerUIButton != null)
+            {
+                returnPerUIButton.onClick.AddListener(ReturnPrePanel);
+            }
+
+            buttonIndex++;
         }
 
         content = transform.GetComponentInChildren<ScrollRect>().content;
@@ -120,8 +127,9 @@ public class TurnoutProjectScorePanel : MonoBehaviour, IController
             Debug.Log("valuePanel:" + valuePanel.name);
             valuePanel.transform.SetParent(content);
             CreateItem(valuePanel.transform);
-            valuePanel.GetComponent<UserValuePanel>().id.text = playerValue.Id.ToString();
+            valuePanel.GetComponent<UserValuePanel>().id.text = (i + 1).ToString();
             valuePanel.GetComponent<UserValuePanel>().userId.text = playerValue.UserId;
+            valuePanel.GetComponent<UserValuePanel>().counterTime.text = playerValue.CounterTime;
             valuePanel.GetComponent<UserValuePanel>().time.text = playerValue.Time;
             valuePanel.GetComponent<UserValuePanel>().subProjectName = playerValue.SubProjectName;
         }

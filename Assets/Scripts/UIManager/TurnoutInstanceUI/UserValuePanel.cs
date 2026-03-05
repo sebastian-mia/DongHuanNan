@@ -10,6 +10,7 @@ public class UserValuePanel : MonoBehaviour, IController
 {
     public TMP_Text id;
     public TMP_Text userId;
+    public TMP_Text counterTime;
     public TMP_Text time;
     public string subProjectName;
     public Button submitButton;
@@ -31,7 +32,8 @@ public class UserValuePanel : MonoBehaviour, IController
             var turnoutRecordScore = trunoutRecordScoreUI.GetComponent<TurnoutProjectWithIDScorePanel>();
             if (turnoutRecordScore != null)
             {
-                turnoutRecordScore.ShowTurnoutRecordScoreValue(subProjectName, userId.text, time.text);
+                turnoutRecordScore.ShowTurnoutRecordScoreValue(subProjectName, userId.text,
+                    counterTime.text, time.text);
             }
         }
     }

@@ -8,7 +8,7 @@ public class PerpareDownSideToTranslate2RouteCommand : AbstractCommand
     protected override void OnExecute()
     {
         this.GetModel<TurnoutModel>().targetRoute
-            .SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行));
+            .SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行入库));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
             new TurnoutMachine(TurnoutID.Turnout01, LockedState.反位钩锁, IsPowerCut.已断电, TurnoutState.反位));
         this.GetModel<TurnoutModel>().targetRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,

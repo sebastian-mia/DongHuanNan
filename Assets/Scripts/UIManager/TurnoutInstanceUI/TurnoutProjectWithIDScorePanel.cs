@@ -10,22 +10,29 @@ using Button = UnityEngine.UI.Button;
 public class TurnoutProjectWithIDScorePanel : MonoBehaviour, IController
 {
     public TMP_Text projectName;
+    public TMP_Text counterTimeText;
     private Transform content;
     public string valuePanelName = "RecordValuePanel";
     public Button returnPerUIButton;
     private TurnoutDatabaseManager turnoutDatabaseManager;
-    private int projectId;
+    private int ButtonIndex;
 
     private void OnEnable()
     {
         turnoutDatabaseManager = this.GetUtility<TurnoutDatabaseManager>();
-        returnPerUIButton.onClick.AddListener(ReturnPrePanel);
+        if (ButtonIndex < 1)
+        {
+            returnPerUIButton.onClick.AddListener(ReturnPrePanel);
+            ButtonIndex++;
+        }
+
         content = transform.GetComponentInChildren<ScrollRect>().content;
     }
 
-    public void ShowTurnoutRecordScoreValue(string subProjectName, string userId, string time)
+    public void ShowTurnoutRecordScoreValue(string subProjectName, string userId, string counterTime, string time)
     {
         projectName.text = subProjectName;
+        counterTimeText.text = counterTime;
         var turnoutNodeDatas = turnoutDatabaseManager.GetNodesBySubProject(subProjectName, userId, time);
         ShowNodeValue(turnoutNodeDatas);
     }

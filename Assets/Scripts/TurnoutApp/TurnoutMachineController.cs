@@ -66,7 +66,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
             xRKnobColliders = xRKnob.transform.GetChild(0).GetComponents<BoxCollider>();
             rotationOnlySync.SetTarget(xRKnob.transform.GetChild(0));
             turnoutMoveTByKnob.knob = xRKnob;
-            xRKnob.onValueChange.RemoveListener(EnableHandler); // 防止重复
+            // xRKnob.onValueChange.RemoveListener(EnableHandler); // 防止重复
             xRKnob.onValueChange.AddListener(EnableHandler);
         }
 
@@ -108,6 +108,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
         if (turnoutLockReverseSocketInteractor != null)
         {
             turnoutLockReverseSocketInteractor.selectEntered.AddListener(LockTurnout);
+            turnoutLockReverseSocketInteractor.selectExited.AddListener(UnLockTurnout);
         }
 
         if (turnoutCutPowerSocketInteractor != null)
@@ -145,6 +146,7 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     public void LockTurnout(SelectEnterEventArgs args)
     {
+        audioManager.PlayLockSound();
         var animator = args.interactableObject.transform.GetComponent<Animator>();
         if (animator == null) return;
 
@@ -153,6 +155,8 @@ public class TurnoutMachineController : MonoBehaviour, IController
             this.SendCommand<ToggleTurnoutLockToNormalCommand>(new ToggleTurnoutLockToNormalCommand(turnoutID));
         else
             this.SendCommand<ToggleTurnoutLockToReverseCommand>(new ToggleTurnoutLockToReverseCommand(turnoutID));
+        Debug.Log("TurnoutLock:" +
+                  this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState);
     }
 
     private void UnLockTurnout(SelectExitEventArgs args)
@@ -162,10 +166,13 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
         animator.SetBool(lockTurnoutTag, false);
         this.SendCommand<ToggleTurnoutLockToNothingCommand>(new ToggleTurnoutLockToNothingCommand(turnoutID));
+        Debug.Log("TurnoutLock:" +
+                  this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState);
     }
 
     private void DisableHandler(XRGrabInteractable xRGrabInteractable, WaistSlotItem waistSlotItem)
     {
+        audioManager.PlayHandlerSound();
         handlerRb = xRGrabInteractable.GetComponent<Rigidbody>();
         xRGrabInteractable.GetComponent<MeshRenderer>().enabled = false;
         var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
@@ -189,7 +196,11 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void EnableHandler(float value)
     {
-        audioManager.PlayturnoutMachineWorkingSound();
+        if (xRKnob.isSelected)
+        {
+            audioManager.PlayturnoutMachineWorkingSound();
+        }
+
         if (currentValue <= 0 + deathFloat)
         {
             if (value >= 1 - deathFloat)
@@ -273,6 +284,11 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private void Update()
     {
+    }
+
+    private void OnDestroy()
+    {
+        xRKnob.onValueChange.RemoveListener(EnableHandler);
     }
 
     public IArchitecture GetArchitecture()

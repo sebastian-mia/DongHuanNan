@@ -10,6 +10,7 @@ using Button = UnityEngine.UI.Button;
 public class TrunoutScoreUI : MonoBehaviour, IController
 {
     public TMP_Text subProjectName;
+    public TMP_Text counterTime;
     private Transform content;
     private TurnoutModel turnoutModel;
     public string valuePanelName = "ValuePanel";
@@ -58,7 +59,8 @@ public class TrunoutScoreUI : MonoBehaviour, IController
     public void ShowNodeValue()
     {
         var turnoutSubProjectData = new TurnoutSubProjectData(projectId,
-            turnoutModel.currentsubProjectName, gameRecordModel.UserId, turnoutModel.currentStationId);
+            turnoutModel.currentsubProjectName, gameRecordModel.UserId, turnoutModel.counterTime,
+            turnoutModel.currentStationId);
         var turnoutNodes = new List<TurnoutNodeData>();
         for (var i = 0; i < turnoutModel.nodeValues.Count; i++)
         {
@@ -108,7 +110,13 @@ public class TrunoutScoreUI : MonoBehaviour, IController
         turnoutModel.nodeValues.Clear();
         turnoutModel.scorePanelIndex = 0;
         turnoutModel.currentsubProjectName = null;
+        // turnoutModel.targetRoute.Value = null;
+        // turnoutModel.currentRoute.Value = null;
+        turnoutModel.counterTime = "00:00";
+        turnoutModel.routeCount = 0;
+        turnoutModel.isCorrectRoute = false;
         gameRecordModel.UserId = null;
+        gameRecordModel.currentprojectId = 0;
 
         VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }

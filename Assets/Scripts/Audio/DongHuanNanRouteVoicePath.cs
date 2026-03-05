@@ -13,5 +13,5 @@
     public static readonly string turnoutProjectRouteTranslate1ToUpSideSoundPath = $"resources://Voice/折返线1道至东环南路上行";
 
     public static readonly string turnoutProjectRouteTranslate2ToUpSideSideSoundPath =
-        $"resources://Voice/东环南路上行至折返线2道";
+        $"resources://Voice/折返线2道至东环南路上行";
 }

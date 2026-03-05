@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 
 /// <summary>
 /// 挂载到 UI 根节点，自动给所有子 UI 添加震动
@@ -8,9 +9,9 @@ using UnityEngine.UI;
 /// </summary>
 public class UIAutoHaptic : MonoBehaviour
 {
-    [Header("震动设置")] [SerializeField] private float hoverEnterAmp = 0.3f;
-    [SerializeField] private float hoverStayAmp = 0.08f;
-    [SerializeField] private float clickAmp = 0.5f;
+    [Header("震动设置")] 
+    [SerializeField] private float hoverEnterAmp = 0.1f;
+    [SerializeField] private float clickAmp = 0.1f;
 
     void Start()
     {
@@ -50,27 +51,47 @@ public class UIAutoHaptic : MonoBehaviour
         trigger.triggers.Add(entry);
     }
 
-    ControllerHand GetHand(BaseEventData data)
+    /// <summary>
+    /// 🔥 修正：PICO 的 pointerId 是 3=左手, 2=右手
+    /// </summary>
+    public ControllerHand GetHand(BaseEventData data)
     {
-        if (data is PointerEventData pointerData && pointerData.pointerPressRaycast.gameObject != null)
+        PointerEventData pointerData = data as PointerEventData;
+        
+        if (pointerData == null)
         {
-            string name = pointerData.pointerPressRaycast.gameObject.name.ToLower();
-            if (name.Contains("left")) return ControllerHand.Left;
-            if (name.Contains("right")) return ControllerHand.Right;
+            Debug.LogWarning($"[UIAutoHaptic] data 不是 PointerEventData，实际类型: {data?.GetType().Name}");
+            return ControllerHand.Both;
         }
 
+        Debug.Log($"[UIAutoHaptic] PointerId: {pointerData.pointerId}");
+
+        // 🔥 PICO XR: 3=左手, 2=右手
+        if (pointerData.pointerId == 3)
+            return ControllerHand.Left;
+        if (pointerData.pointerId == 2)
+            return ControllerHand.Right;
+        
+        // 回退：如果未来变成 0/1 也能工作
+        if (pointerData.pointerId == 0)
+            return ControllerHand.Left;
+        if (pointerData.pointerId == 1)
+            return ControllerHand.Right;
+        
         return ControllerHand.Both;
     }
 
     void OnUIHoverEnter(BaseEventData data)
     {
         var hand = GetHand(data);
+        Debug.Log($"[UIAutoHaptic] HoverEnter 手: {hand}");
         PICO_HapticController.Instance?.TriggerHaptic(hand, hoverEnterAmp, 0.05f);
     }
 
     void OnUIClick(BaseEventData data)
     {
         var hand = GetHand(data);
+        Debug.Log($"[UIAutoHaptic] Click 手: {hand}");
         PICO_HapticController.Instance?.TriggerHaptic(hand, clickAmp, 0.1f);
     }
 }

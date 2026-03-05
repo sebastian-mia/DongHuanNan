@@ -22,7 +22,10 @@ public class MainMenuSceneManager : MonoBehaviour, IController
 
     private IEnumerator WaitVoiceCoroutine()
     {
+        Debug.Log("主界面语音");
+
         yield return new WaitForSeconds(waitVoiceTime);
+        audioManager.PlayMainBackGroundMusic();
         if (gameRecordModel.IsSecordToMainMenu)
         {
             audioManager.PlayVoiceSecondInMainMenuScene();
@@ -31,6 +34,7 @@ public class MainMenuSceneManager : MonoBehaviour, IController
         {
             audioManager.PlayVoiceInMainMenuScene();
         }
+
         gameRecordModel.IsSecordToMainMenu = true;
     }
 

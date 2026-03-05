@@ -178,7 +178,7 @@ public class TurnoutDatabaseManager : IUtility
 
         _connection.Execute(@"
             CREATE UNIQUE INDEX IF NOT EXISTS idx_subproject_unique 
-            ON TurnoutSubProjectData(ProjectId, SubProjectName, UserId, Time)
+            ON TurnoutSubProjectData(ProjectId, SubProjectName, UserId,CounterTime, Time)
         ");
 
         _connection.Execute(@"
@@ -274,6 +274,7 @@ public class TurnoutDatabaseManager : IUtility
         string userId,
         int stationId,
         string time,
+        string counterTime,
         List<TurnoutNodeData> nodes)
     {
         // 变更：使用 FirstOrDefault 的 LINQ 语法
@@ -301,6 +302,7 @@ public class TurnoutDatabaseManager : IUtility
             SubProjectName = subProjectName,
             UserId = userId,
             Time = time,
+            CounterTime = counterTime,
             StationId = stationId
         };
         _connection.Insert(subProject);

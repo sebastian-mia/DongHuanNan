@@ -18,7 +18,8 @@ public class SetTurnoutSubProjectAndNodeDataCommand : AbstractCommand
     {
         this.GetUtility<TurnoutDatabaseManager>().InsertTurnoutProject(_turnoutSubProjectData.ProjectId,
             _turnoutSubProjectData.SubProjectName, _turnoutSubProjectData.UserId, _turnoutSubProjectData.StationId,
-            this.GetUtility<TimeFormatter>().FormatDateTime(DateTime.Now), _turnoutNodeDatas);
+            this.GetUtility<TimeFormatter>().FormatDateTime(DateTime.Now), _turnoutSubProjectData.CounterTime,
+            _turnoutNodeDatas);
         this.SendEvent<ModifyTurnoutSubProjectDataEvent>();
         this.SendEvent<ModifyTurnoutNodeDataEvent>();
     }

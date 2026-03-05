@@ -11,11 +11,12 @@ public class RedLightSocketController : MonoBehaviour, IController
     private readonly string IEFlashLightTag = "FlashLight";
     private Renderer lightMeshRenderer;
     private readonly string emissionTag = "_EMISSION";
+    private AudioManager audioManager;
 
     void Start()
     {
         socketInteractor = GetComponent<XRSocketInteractor>();
-
+        audioManager = this.GetUtility<AudioManager>();
         if (socketInteractor != null)
         {
             socketInteractor.selectEntered.AddListener(ShowFlashLight);
@@ -25,12 +26,14 @@ public class RedLightSocketController : MonoBehaviour, IController
 
     private void ShowFlashLight(SelectEnterEventArgs args)
     {
+        audioManager.PlayPutDownRedLightSound();
         lightMeshRenderer = args.interactableObject.transform.GetChild(0).GetComponent<Renderer>();
         StartCoroutine(IEFlashLightTag);
     }
 
     private void CloseFlashLight(SelectExitEventArgs args)
     {
+        audioManager.PlayPutDownRedLightSound();
         this.SendCommand<JudgeRouteCommand>(new JudgeRouteCommand(redLightPosition));
         lightMeshRenderer = args.interactableObject.transform.GetChild(0).GetComponent<Renderer>();
         StopCoroutine(IEFlashLightTag);

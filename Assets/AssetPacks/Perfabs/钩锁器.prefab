@@ -259,7 +259,7 @@ GameObject:
   - component: {fileID: 8463224194303711742}
   m_Layer: 0
   m_Name: "\u94A9\u9501\u5668"
-  m_TagString: Untagged
+  m_TagString: WaistSlotsItem
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -520,6 +520,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   lifeAfterDrop: 0.2
+  ignoreCollisionWithWaistItems: 1
+  ignoreCollisionWithClones: 1
+  waistItemTag: WaistSlotsItem
 --- !u!114 &8463224194303711742
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -532,8 +535,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverAmp: 0.2
+  hoverAmp: 0.3
   selectAmp: 0.6
+  leftTriggerAction: {fileID: -3824198262760338608, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
+  rightTriggerAction: {fileID: 5199090702169049186, guid: c348712bda248c246b8c49b3db54643f,
+    type: 3}
 --- !u!1 &5922308463677502824
 GameObject:
   m_ObjectHideFlags: 0

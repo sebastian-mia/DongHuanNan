@@ -3,28 +3,36 @@
 // 作用: 交互时自动触发震动
 
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.XR.Interaction.Toolkit;
 
 [RequireComponent(typeof(XRBaseInteractable))]
 public class PICO_HapticOnInteract : MonoBehaviour
 {
     [SerializeField] private float hoverAmp = 0.2f;
-    [SerializeField] private float selectAmp = 0.6f;
-    
+    [SerializeField] private float selectAmp = 0.2f;
+    [SerializeField]
+    private InputActionReference leftTriggerAction;
+    [SerializeField]
+    private InputActionReference rightTriggerAction;
+
     private XRBaseInteractable _interactable;
 
     void Awake()
     {
         _interactable = GetComponent<XRBaseInteractable>();
-        
+
         _interactable.hoverEntered.AddListener(OnHover);
         _interactable.selectEntered.AddListener(OnSelect);
     }
 
     void OnHover(HoverEnterEventArgs args)
     {
-        var hand = GetHand(args.interactor);
-        PICO_HapticController.Instance?.TriggerHaptic(hand, hoverAmp, 0.05f);
+        if (!leftTriggerAction.action.triggered && !rightTriggerAction.action.triggered)
+        {
+            var hand = GetHand(args.interactor);
+            PICO_HapticController.Instance?.TriggerHaptic(hand, hoverAmp, 0.05f);
+        }
     }
 
     void OnSelect(SelectEnterEventArgs args)

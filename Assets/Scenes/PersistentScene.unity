@@ -303,7 +303,7 @@ MonoBehaviour:
   blackScreenFrames: 2
   leftControllerTag: LeftController
   rightControllerTag: RightController
-  waistSlotsTag: WaistSlots
+  turnoutWaistSlots: {fileID: 1159579569}
 --- !u!4 &753990119
 Transform:
   m_ObjectHideFlags: 0
@@ -529,26 +529,12 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1032661217}
   m_CullTransparentMesh: 1
---- !u!1 &1609733971 stripped
+--- !u!1 &1159579569 stripped
 GameObject:
-  m_CorrespondingSourceObject: {fileID: 165370079253067306, guid: a0c0da490458b5745923a86908f2c91b,
+  m_CorrespondingSourceObject: {fileID: 6530300257002897248, guid: a0c0da490458b5745923a86908f2c91b,
     type: 3}
   m_PrefabInstance: {fileID: 1653152741}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1609733982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1609733971}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hoverAmp: 0.2
-  selectAmp: 0.6
 --- !u!1001 &1653152741
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -607,68 +593,31 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 3573515682689963416, guid: a0c0da490458b5745923a86908f2c91b,
+    - target: {fileID: 3049340374366949866, guid: a0c0da490458b5745923a86908f2c91b,
         type: 3}
-      propertyPath: delayTime
-      value: 0.1
+      propertyPath: hoverAmp
+      value: 0.3
       objectReference: {fileID: 0}
-    - target: {fileID: 3573515682689963416, guid: a0c0da490458b5745923a86908f2c91b,
+    - target: {fileID: 4143690848372907027, guid: a0c0da490458b5745923a86908f2c91b,
         type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3573515682689963416, guid: a0c0da490458b5745923a86908f2c91b,
-        type: 3}
-      propertyPath: useInstantSnap
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3573515682689963416, guid: a0c0da490458b5745923a86908f2c91b,
-        type: 3}
-      propertyPath: socketGracePeriod
-      value: 1
+      propertyPath: hoverAmp
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 6892439667819423298, guid: a0c0da490458b5745923a86908f2c91b,
         type: 3}
       propertyPath: m_Name
       value: XR Interaction Setup
       objectReference: {fileID: 0}
+    - target: {fileID: 8487823285625976924, guid: a0c0da490458b5745923a86908f2c91b,
+        type: 3}
+      propertyPath: hoverAmp
+      value: 0.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 8570996362862406408, guid: a0c0da490458b5745923a86908f2c91b,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1959575764}
-    - targetCorrespondingSourceObject: {fileID: 781244535405105109, guid: a0c0da490458b5745923a86908f2c91b,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1705857630}
-    - targetCorrespondingSourceObject: {fileID: 165370079253067306, guid: a0c0da490458b5745923a86908f2c91b,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 1609733982}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a0c0da490458b5745923a86908f2c91b, type: 3}
---- !u!1 &1705857622 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 781244535405105109, guid: a0c0da490458b5745923a86908f2c91b,
-    type: 3}
-  m_PrefabInstance: {fileID: 1653152741}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1705857630
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1705857622}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hoverAmp: 0.2
-  selectAmp: 0.6
 --- !u!1 &1806507682
 GameObject:
   m_ObjectHideFlags: 0
@@ -923,26 +872,6 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
---- !u!1 &1959575759 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 8570996362862406408, guid: a0c0da490458b5745923a86908f2c91b,
-    type: 3}
-  m_PrefabInstance: {fileID: 1653152741}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1959575764
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1959575759}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d42427dd509f20541862eb1ce0aa7578, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hoverAmp: 0.2
-  selectAmp: 0.6
 --- !u!1 &1979352951
 GameObject:
   m_ObjectHideFlags: 0

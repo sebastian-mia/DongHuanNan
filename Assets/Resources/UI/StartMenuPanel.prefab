@@ -125,9 +125,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d88a6778e89a20d40a8d422865253c85, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  hoverEnterAmp: 0.25
-  hoverStayAmp: 0.08
-  clickAmp: 0.6
+  hoverEnterAmp: 0.2
+  clickAmp: 0.2
 --- !u!1001 &77619995077969902
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -19,21 +19,26 @@ public class TurnoutProjectPanel : MonoBehaviour, IController
 
     private EnumUtils enumUtils;
     private TurnoutDatabaseManager databaseManager;
+    private int buttonIndex;
 
     void Start()
     {
         enumUtils = this.GetUtility<EnumUtils>();
         databaseManager = this.GetUtility<TurnoutDatabaseManager>();
         InitLineAndStationOptions();
-        lineDropdown.onValueChanged.AddListener(e =>
+        if (buttonIndex < 1)
         {
-            lineInputField.text = lineDropdown.options[lineDropdown.value].text;
-            ShowStationOptions(e);
-        });
-        stationDropdown.onValueChanged.AddListener(e =>
-        {
-            stationInputField.text = stationDropdown.options[stationDropdown.value].text;
-        });
+            lineDropdown.onValueChanged.AddListener(e =>
+            {
+                lineInputField.text = lineDropdown.options[lineDropdown.value].text;
+                ShowStationOptions(e);
+            });
+            stationDropdown.onValueChanged.AddListener(e =>
+            {
+                stationInputField.text = stationDropdown.options[stationDropdown.value].text;
+            });
+            buttonIndex++;
+        }
     }
 
     private void OnEnable()

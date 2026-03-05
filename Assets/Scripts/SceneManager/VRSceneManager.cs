@@ -8,55 +8,67 @@ using System.Collections.Generic;
 using System.Linq;
 using Unity.XR.CoreUtils;
 using System.Collections;
+using QFramework;
 
-public class VRSceneManager : MonoBehaviour
+public class VRSceneManager : MonoBehaviour, IController
 {
     public static VRSceneManager Instance { get; private set; }
 
-    [Header("Scene References")] 
-    [SerializeField] private Transform xrOrigin;
+    [Header("Scene References")] [SerializeField]
+    private Transform xrOrigin;
+
     [SerializeField] private CameraFade cameraFader;
     [SerializeField] private LoadingScreen loadingScreen;
 
-    [Header("XR Locomotion Control")] 
-    [SerializeField] private LocomotionSystem locomotionSystem;
+    [Header("XR Locomotion Control")] [SerializeField]
+    private LocomotionSystem locomotionSystem;
+
     [SerializeField] private bool disableMovementDuringLoading = true;
 
-    [Header("场景特定移动限制")]
-    [SerializeField] private List<string> restrictMovementScenes = new List<string>() { "MenuScene", "MainMenu" };
+    [Header("场景特定移动限制")] [SerializeField]
+    private List<string> restrictMovementScenes = new List<string>() { "MenuScene", "MainMenu" };
+
     [SerializeField] private bool autoRestrictInMenu = true;
-    
-    [Header("Spawn Point Settings")] 
-    [SerializeField] private string spawnPointTag = "StartPoint";
+
+    [Header("Spawn Point Settings")] [SerializeField]
+    private string spawnPointTag = "StartPoint";
+
     [SerializeField] private bool autoMoveToSpawnPoint = true;
 
-    [Header("Fade Settings")]
-    [SerializeField] private float fadeInDuration = 0.8f;     
-    [SerializeField] private int blackScreenFrames = 2;       
-    
-    [Header("Controller Settings")]
-    [SerializeField] private string leftControllerTag = "LeftController";
+    [Header("Fade Settings")] [SerializeField]
+    private float fadeInDuration = 0.8f;
+
+    [SerializeField] private int blackScreenFrames = 2;
+
+    [Header("Controller Settings")] [SerializeField]
+    private string leftControllerTag = "LeftController";
+
     [SerializeField] private string rightControllerTag = "RightController";
-    [SerializeField] private string waistSlotsTag = "WaistSlots";
-    
+
     private List<Scene> loadedScenes = new List<Scene>();
     private bool isLoading = false;
     private bool isMovementRestricted = false;
-    
+
     private GameObject leftController;
     private GameObject rightController;
-    private GameObject waistSlots;
-    private bool hasCachedObjects = false;
 
-    // 缩放恢复用的原始值缓存
+    // 🔥 改为属性动态检查，不用缓存标志
+    private bool ControllersCached => leftController != null || rightController != null;
+
     private Vector3 leftControllerOriginalScale = Vector3.one;
     private Vector3 rightControllerOriginalScale = Vector3.one;
-    private Vector3 waistSlotsOriginalScale = Vector3.one;
 
     public static event Action<Transform> OnXROriginChanged;
-    
     public event Action<string> OnSceneLoaded;
     public event Action<string> OnSceneUnloaded;
+
+    [Header("WaistSlots")] public GameObject turnoutWaistSlots;
+
+    private Vector3 slotsOriginalScale = Vector3.one;
+    private bool slotsScaleCached = false;
+
+    private GameRecordModel gameRecordModel;
+    private TurnoutDatabaseManager turnoutDatabaseManager;
 
     void Awake()
     {
@@ -73,103 +85,126 @@ public class VRSceneManager : MonoBehaviour
             locomotionSystem = FindObjectOfType<LocomotionSystem>();
 
         EnsureXROrigin();
-        
-        FindAndCacheAllObjects();
-        
+
+        // 🔥 初始查找，但允许失败
+        FindAndCacheControllers();
+
+        CacheAndHideSlots();
         cameraFader?.SetTransparent();
     }
 
     void Start()
     {
-        if (!hasCachedObjects)
-        {
-            FindAndCacheAllObjects();
-        }
+        gameRecordModel = this.GetModel<GameRecordModel>();
+        turnoutDatabaseManager = this.GetUtility<TurnoutDatabaseManager>();
+
+        // 🔥 强制重新查找，确保找到
+        FindAndCacheControllers();
+
+        // 🔥 初始隐藏控制器
+        SetControllersVisible(false);
     }
 
-    private void FindAndCacheAllObjects()
+    /// <summary>
+    /// 🔥 关键修复：每次使用前都确保缓存有效
+    /// </summary>
+    private void FindAndCacheControllers()
     {
-        bool foundAny = false;
+        bool foundNew = false;
 
+        // 左控制器
         if (leftController == null && !string.IsNullOrEmpty(leftControllerTag))
         {
             GameObject[] leftControllers = GameObject.FindGameObjectsWithTag(leftControllerTag);
-            if (leftControllers.Length > 0)
+            // 🔥 过滤激活的物体
+            leftController = leftControllers.FirstOrDefault(go => go.activeInHierarchy);
+
+            if (leftController != null)
             {
-                leftController = leftControllers[0];
                 leftControllerOriginalScale = leftController.transform.localScale;
-                foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存左控制器: {leftController.name}, 原始缩放: {leftControllerOriginalScale}");
+                // 🔥 如果缩放为0，设为1（可能被之前的逻辑隐藏了）
+                if (leftControllerOriginalScale == Vector3.zero)
+                    leftControllerOriginalScale = Vector3.one;
+
+                foundNew = true;
+                Debug.Log($"[VRSceneManager] 缓存左控制器: {leftController.name}, 缩放: {leftControllerOriginalScale}");
             }
         }
 
+        // 右控制器
         if (rightController == null && !string.IsNullOrEmpty(rightControllerTag))
         {
             GameObject[] rightControllers = GameObject.FindGameObjectsWithTag(rightControllerTag);
-            if (rightControllers.Length > 0)
+            rightController = rightControllers.FirstOrDefault(go => go.activeInHierarchy);
+
+            if (rightController != null)
             {
-                rightController = rightControllers[0];
                 rightControllerOriginalScale = rightController.transform.localScale;
-                foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存右控制器: {rightController.name}, 原始缩放: {rightControllerOriginalScale}");
+                if (rightControllerOriginalScale == Vector3.zero)
+                    rightControllerOriginalScale = Vector3.one;
+
+                foundNew = true;
+                Debug.Log($"[VRSceneManager] 缓存右控制器: {rightController.name}, 缩放: {rightControllerOriginalScale}");
             }
         }
 
-        if (waistSlots == null && !string.IsNullOrEmpty(waistSlotsTag))
+        if (!foundNew && !ControllersCached)
         {
-            GameObject[] slots = GameObject.FindGameObjectsWithTag(waistSlotsTag);
-            if (slots.Length > 0)
-            {
-                waistSlots = slots[0];
-                waistSlotsOriginalScale = waistSlots.transform.localScale;
-                foundAny = true;
-                Debug.Log($"[VRSceneManager] 缓存WaistSlots: {waistSlots.name}, 原始缩放: {waistSlotsOriginalScale}");
-            }
-        }
-
-        if (foundAny)
-        {
-            hasCachedObjects = true;
-        }
-    }
-
-    private void EnsureCacheInitialized()
-    {
-        if (!hasCachedObjects || (leftController == null && rightController == null && waistSlots == null))
-        {
-            Debug.Log("[VRSceneManager] 缓存未初始化或已失效，重新查找...");
-            FindAndCacheAllObjects();
+            Debug.LogWarning("[VRSceneManager] 未找到任何控制器，将在使用时重试");
         }
     }
 
     /// <summary>
-    /// 设置所有控制器和WaistSlots的缩放（0=隐藏/不可交互，1=显示/可交互）
+    /// 🔥 关键修复：强制刷新缓存，无视之前的状态
     /// </summary>
-    private void SetControllersAndSlotsVisible(bool visible)
+    private void ForceRefreshControllers()
     {
-        EnsureCacheInitialized();
+        leftController = null;
+        rightController = null;
+        FindAndCacheControllers();
+    }
 
-        // 左控制器
-        if (leftController != null)
+    /// <summary>
+    /// 🔥 关键修复：设置可见性前确保缓存有效
+    /// </summary>
+    private void SetControllersVisible(bool visible)
+    {
+        // 🔥 如果缓存无效，尝试查找
+        if (!ControllersCached)
         {
-            leftController.transform.localScale = visible ? leftControllerOriginalScale : Vector3.zero;
-            Debug.Log($"[VRSceneManager] 左控制器 {(visible ? "显示" : "隐藏")} (缩放: {(visible ? leftControllerOriginalScale : Vector3.zero)})");
+            FindAndCacheControllers();
         }
 
-        // 右控制器
+        // 🔥 再次检查，如果还是找不到，延迟一帧重试
+        if (!ControllersCached && gameObject.activeInHierarchy)
+        {
+            StartCoroutine(DelayedSetVisible(visible));
+            return;
+        }
+
+        Vector3 targetScale = visible ? leftControllerOriginalScale : Vector3.zero;
+
+        if (leftController != null)
+        {
+            leftController.transform.localScale = targetScale;
+            Debug.Log($"[VRSceneManager] 左控制器 {(visible ? "显示" : "隐藏")}，缩放: {targetScale}");
+        }
+
         if (rightController != null)
         {
             rightController.transform.localScale = visible ? rightControllerOriginalScale : Vector3.zero;
             Debug.Log($"[VRSceneManager] 右控制器 {(visible ? "显示" : "隐藏")}");
         }
-
-        // WaistSlots
-        if (waistSlots != null)
-        {
-            waistSlots.transform.localScale = visible ? waistSlotsOriginalScale : Vector3.zero;
-            Debug.Log($"[VRSceneManager] WaistSlots {(visible ? "显示" : "隐藏")} (缩放: {(visible ? waistSlotsOriginalScale : Vector3.zero)})");
-        }
     }
+
+    private IEnumerator DelayedSetVisible(bool visible)
+    {
+        yield return null; // 等待一帧
+        FindAndCacheControllers();
+        SetControllersVisible(visible);
+    }
+
+    // ========== 其他方法保持不变，但移除 hasCachedObjects 相关逻辑 ==========
 
     public async Task LoadSceneAsync(string sceneName, bool setActive = true, bool showLoading = true)
     {
@@ -178,7 +213,9 @@ public class VRSceneManager : MonoBehaviour
 
         isLoading = true;
 
-        SetControllersAndSlotsVisible(false);
+        // 🔥 确保隐藏前刷新缓存
+        ForceRefreshControllers();
+        SetControllersVisible(false);
 
         if (disableMovementDuringLoading)
         {
@@ -200,7 +237,7 @@ public class VRSceneManager : MonoBehaviour
                 Debug.LogError($"[VRSceneManager] 场景 {sceneName} 加载失败");
                 return;
             }
-            
+
             operation.allowSceneActivation = false;
             float lastProgress = 0f;
 
@@ -212,12 +249,13 @@ public class VRSceneManager : MonoBehaviour
                     lastProgress = currentProgress;
                     loadingScreen?.SetProgress(currentProgress);
                 }
+
                 await Task.Yield();
             }
 
             loadingScreen?.SetProgress(0.9f);
             operation.allowSceneActivation = true;
-            
+
             float fakeProgress = 0.9f;
             while (!operation.isDone)
             {
@@ -255,6 +293,12 @@ public class VRSceneManager : MonoBehaviour
                 await moveTask;
             }
 
+            await Task.Yield();
+            await Task.Yield();
+            Physics.SyncTransforms();
+            await Task.Yield();
+
+            ChooseWaistSlotsByProjectId();
             CheckAndApplyMovementRestriction(sceneName);
 
             if (showLoading)
@@ -273,10 +317,11 @@ public class VRSceneManager : MonoBehaviour
         finally
         {
             isLoading = false;
-            
-            SetControllersAndSlotsVisible(true);
-            
-            // 修正：根据场景限制状态决定是否启用移动
+
+            // 🔥 场景加载完成后，控制器应该已存在，强制刷新后显示
+            ForceRefreshControllers();
+            SetControllersVisible(true);
+
             if (disableMovementDuringLoading)
             {
                 if (isMovementRestricted)
@@ -298,8 +343,8 @@ public class VRSceneManager : MonoBehaviour
         if (isLoading) return;
         isLoading = true;
 
-        SetControllersAndSlotsVisible(false);
-        
+        ForceRefreshControllers();
+        SetControllersVisible(false);
         SetLocomotionEnabled(false);
 
         try
@@ -317,8 +362,8 @@ public class VRSceneManager : MonoBehaviour
                     OnSceneUnloaded?.Invoke(sceneName);
                 }
             }
-            loadedScenes.Clear();
 
+            loadedScenes.Clear();
             await Task.Yield();
 
             AsyncOperation operation = SceneManager.LoadSceneAsync(newSceneName, LoadSceneMode.Additive);
@@ -327,7 +372,7 @@ public class VRSceneManager : MonoBehaviour
                 Debug.LogError($"[VRSceneManager] 场景 {newSceneName} 加载失败！");
                 return;
             }
-            
+
             operation.allowSceneActivation = false;
             float lastProgress = 0f;
 
@@ -339,12 +384,13 @@ public class VRSceneManager : MonoBehaviour
                     lastProgress = currentProgress;
                     loadingScreen?.SetProgress(currentProgress);
                 }
+
                 await Task.Yield();
             }
 
             loadingScreen?.SetProgress(0.9f);
             operation.allowSceneActivation = true;
-            
+
             float fakeProgress = 0.9f;
             while (!operation.isDone)
             {
@@ -357,7 +403,7 @@ public class VRSceneManager : MonoBehaviour
             loadingScreen?.SetProgress(1f);
 
             cameraFader?.SetBlack();
-            for (int i = 0; i < blackScreenFrames; i++) 
+            for (int i = 0; i < blackScreenFrames; i++)
                 await Task.Yield();
 
             Scene newScene = SceneManager.GetSceneByName(newSceneName);
@@ -368,7 +414,6 @@ public class VRSceneManager : MonoBehaviour
             }
 
             OnSceneLoaded?.Invoke(newSceneName);
-
             EnsureXROrigin();
 
             if (autoMoveToSpawnPoint && xrOrigin != null && newScene.IsValid())
@@ -377,12 +422,18 @@ public class VRSceneManager : MonoBehaviour
                 await moveTask;
             }
 
+            await Task.Yield();
+            await Task.Yield();
+            Physics.SyncTransforms();
+            await Task.Yield();
+
+            ChooseWaistSlotsByProjectId();
             CheckAndApplyMovementRestriction(newSceneName);
 
             var fadeTask = FadeFromBlack();
             loadingScreen?.HideImmediate();
             await fadeTask;
-            
+
             Resources.UnloadUnusedAssets();
         }
         catch (Exception e)
@@ -393,10 +444,11 @@ public class VRSceneManager : MonoBehaviour
         finally
         {
             isLoading = false;
-            
-            SetControllersAndSlotsVisible(true);
-            
-            // 修正：根据场景限制状态决定是否启用移动
+
+            // 🔥 关键：新场景加载后，XR控制器已重新创建，必须强制刷新
+            ForceRefreshControllers();
+            SetControllersVisible(true);
+
             if (isMovementRestricted)
             {
                 SetLocomotionEnabled(false);
@@ -410,16 +462,18 @@ public class VRSceneManager : MonoBehaviour
         }
     }
 
+    // ========== 其他方法保持不变 ==========
+
     private async Task MoveXROriginToSceneStartPointAsync(Scene scene)
     {
         if (xrOrigin == null || !scene.IsValid()) return;
 
         Transform spawnPoint = FindSpawnPointInScene(scene);
-        
+
         if (spawnPoint != null)
         {
             Debug.Log($"[VRSceneManager] 找到StartPoint: {spawnPoint.position}，准备使用协程移动");
-            
+
             var tcs = new TaskCompletionSource<object>();
             StartCoroutine(MoveXROriginCoroutine(spawnPoint, tcs));
             await tcs.Task;
@@ -442,7 +496,7 @@ public class VRSceneManager : MonoBehaviour
         XROrigin xrOriginComp = xrOrigin.GetComponent<XROrigin>();
         CharacterController charCtrl = xrOrigin.GetComponent<CharacterController>();
 
-        Debug.Log($"[VRSceneManager] 协程开始: 当前XROrigin位置={xrOrigin.position}, 本地={xrOrigin.localPosition}, 目标={targetPoint.position}");
+        Debug.Log($"[VRSceneManager] 协程开始: 当前XROrigin位置={xrOrigin.position}, 目标={targetPoint.position}");
 
         if (charCtrl != null) charCtrl.enabled = false;
         if (xrOriginComp != null) xrOriginComp.enabled = false;
@@ -452,32 +506,20 @@ public class VRSceneManager : MonoBehaviour
         xrOrigin.localPosition = Vector3.zero;
         xrOrigin.localRotation = Quaternion.identity;
         xrOrigin.localScale = Vector3.one;
-        
-        xrOrigin.GetComponent<Transform>();
-        
+
         yield return null;
-        
-        Debug.Log($"[VRSceneManager] 重置本地变换后: XROrigin世界={xrOrigin.position}, 本地={xrOrigin.localPosition}");
 
         if (xrSetup != null)
         {
             Vector3 setupTargetPos = targetPoint.position - xrOrigin.localPosition;
             xrSetup.position = setupTargetPos;
             xrSetup.rotation = targetPoint.rotation;
-            
-            xrSetup.GetComponent<Transform>();
-            
+
             yield return null;
-            
-            Debug.Log($"[VRSceneManager] 移动父物体后: 父物体={xrSetup.position}, XROrigin={xrOrigin.position}");
-            
+
             if (Vector3.Distance(xrOrigin.position, targetPoint.position) > 0.01f)
             {
-                Debug.LogWarning($"[VRSceneManager] 位置有偏差，强制修正: {Vector3.Distance(xrOrigin.position, targetPoint.position)}");
-                
                 xrSetup.position = targetPoint.position - xrOrigin.localPosition;
-                xrSetup.GetComponent<Transform>();
-                
                 yield return null;
             }
         }
@@ -485,18 +527,15 @@ public class VRSceneManager : MonoBehaviour
         {
             xrOrigin.position = targetPoint.position;
             xrOrigin.rotation = targetPoint.rotation;
-            
             yield return null;
-            
-            Debug.Log($"[VRSceneManager] 直接移动XROrigin到: {xrOrigin.position}");
         }
 
         Physics.SyncTransforms();
         yield return null;
 
         if (xrOriginComp != null) xrOriginComp.enabled = true;
-        
-        if (charCtrl != null) 
+
+        if (charCtrl != null)
         {
             charCtrl.transform.position = xrOrigin.position;
             charCtrl.transform.rotation = xrOrigin.rotation;
@@ -505,7 +544,7 @@ public class VRSceneManager : MonoBehaviour
 
         yield return null;
 
-        Debug.Log($"[VRSceneManager] 协程完成: XROrigin最终位置={xrOrigin.position}, 目标={targetPoint.position}, 差值={Vector3.Distance(xrOrigin.position, targetPoint.position)}");
+        Debug.Log($"[VRSceneManager] 协程完成: XROrigin最终位置={xrOrigin.position}");
 
         tcs.TrySetResult(null);
     }
@@ -513,7 +552,7 @@ public class VRSceneManager : MonoBehaviour
     private void EnsureXROrigin()
     {
         Transform previousXrOrigin = xrOrigin;
-        
+
         if (xrOrigin == null)
         {
             var xro = FindObjectOfType<XROrigin>();
@@ -570,7 +609,7 @@ public class VRSceneManager : MonoBehaviour
 
         var tcs = new TaskCompletionSource<object>();
         var tween = cameraFader.FadeIn(fadeInDuration);
-        
+
         if (tween != null)
         {
             tween.OnComplete(() => tcs.TrySetResult(null));
@@ -586,7 +625,6 @@ public class VRSceneManager : MonoBehaviour
     {
         if (locomotionSystem == null)
         {
-            // 尝试重新查找
             locomotionSystem = FindObjectOfType<LocomotionSystem>();
             if (locomotionSystem == null)
             {
@@ -594,8 +632,7 @@ public class VRSceneManager : MonoBehaviour
                 return;
             }
         }
-        
-        // 直接设置启用状态，不依赖缓存
+
         locomotionSystem.enabled = enabled;
         Debug.Log($"[VRSceneManager] LocomotionSystem {(enabled ? "启用" : "禁用")}");
     }
@@ -603,26 +640,95 @@ public class VRSceneManager : MonoBehaviour
     private Transform FindSpawnPointInScene(Scene scene)
     {
         if (!scene.IsValid()) return null;
-        
+
         GameObject[] rootObjects = scene.GetRootGameObjects();
-        
+
         foreach (var root in rootObjects)
         {
             if (root.CompareTag(spawnPointTag))
                 return root.transform;
-            
+
             Transform found = root.GetComponentsInChildren<Transform>(true)
                 .FirstOrDefault(t => t.CompareTag(spawnPointTag));
-            
-            if (found != null) 
+
+            if (found != null)
                 return found;
         }
-        
+
         return null;
     }
 
-    private bool IsSceneLoaded(string sceneName) => 
+    private bool IsSceneLoaded(string sceneName) =>
         loadedScenes.Exists(s => s.name == sceneName);
-    
+
     public bool IsMovementRestricted => isMovementRestricted;
+
+    private void CacheAndHideSlots()
+    {
+        if (turnoutWaistSlots == null) return;
+
+        slotsOriginalScale = turnoutWaistSlots.transform.localScale;
+        slotsScaleCached = true;
+
+        turnoutWaistSlots.transform.localScale = Vector3.zero;
+
+        Debug.Log($"[VRSceneManager] Slots 原始缩放已缓存: {slotsOriginalScale}，初始隐藏");
+    }
+
+    private void ChooseWaistSlotsByProjectId()
+    {
+        if (turnoutWaistSlots == null) return;
+
+        if (turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId) != null)
+        {
+            Debug.Log("ProjectName:" + turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId));
+            bool shouldShow = turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId)
+                .Contains(ProjectName.人工准备进路.ToString());
+
+            if (shouldShow)
+            {
+                ShowSlots();
+                Debug.Log($"[VRSceneManager] Slots 已显示（缩放恢复）: {slotsOriginalScale}");
+            }
+            else
+            {
+                HideSlots();
+                Debug.Log("[VRSceneManager] Slots 已隐藏（缩放为0）");
+            }
+        }
+        else
+        {
+            HideSlots();
+        }
+    }
+
+    private void ShowSlots()
+    {
+        if (turnoutWaistSlots == null) return;
+
+        if (xrOrigin != null && turnoutWaistSlots.transform.parent != xrOrigin)
+        {
+            turnoutWaistSlots.transform.SetParent(xrOrigin, false);
+        }
+
+        if (slotsScaleCached)
+        {
+            turnoutWaistSlots.transform.localScale = slotsOriginalScale;
+        }
+        else
+        {
+            turnoutWaistSlots.transform.localScale = Vector3.one;
+        }
+    }
+
+    private void HideSlots()
+    {
+        if (turnoutWaistSlots == null) return;
+        turnoutWaistSlots.transform.localScale = Vector3.zero;
+    }
+
+    public IArchitecture GetArchitecture()
+    {
+        return RailGameApp.Interface;
+    }
 }

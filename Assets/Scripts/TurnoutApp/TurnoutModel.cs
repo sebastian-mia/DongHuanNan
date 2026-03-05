@@ -6,6 +6,7 @@ using QFramework;
 public class TurnoutModel : AbstractModel
 {
     public int routeCount;
+    public string counterTime;
     public string currentsubProjectName = "";
     public int currentStationId;
     public BindableProperty<Route> currentRoute = new BindableProperty<Route>();
@@ -17,7 +18,8 @@ public class TurnoutModel : AbstractModel
     protected override void OnInit()
     {
         routeCount = 10;
-        currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行));
+        counterTime = "00:00";
+        currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行入库));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
             new TurnoutMachine(TurnoutID.Turnout01, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout02,
