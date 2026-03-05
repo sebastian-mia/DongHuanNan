@@ -54,6 +54,8 @@ public class TurnoutMachineController : MonoBehaviour, IController
     //Modle
     private TurnoutModel turnoutModel;
 
+    private bool isWaitingForHandlerReturn = false;
+
     public void Start()
     {
         audioManager = this.GetUtility<AudioManager>();
@@ -132,8 +134,19 @@ public class TurnoutMachineController : MonoBehaviour, IController
     private void GetHandlerInteractables(SelectEnterEventArgs args)
     {
         if (args.interactableObject == null) return;
-        if (turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState != LockedState.未加锁) return;
 
+        // Lock 状态下，不做任何处理，手摇把自然吸附，玩家可 Grab，松手后回槽
+        if (turnoutModel.currentRoute.Value.turnoutMachines[turnoutID].LockedState != LockedState.未加锁)
+        {
+            // 保存引用
+            xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
+            waistSlotItem = args.interactableObject.transform.GetComponent<WaistSlotItem>();
+
+            // 不调用 DisableHandler，手摇把保持可见可交互
+            return;
+        }
+
+        // 正常流程
         xRGrabInteractable = args.interactableObject.transform.GetComponent<XRGrabInteractable>();
         waistSlotItem = args.interactableObject.transform.GetComponent<WaistSlotItem>();
         if (xRGrabInteractable != null && waistSlotItem != null)
@@ -142,6 +155,29 @@ public class TurnoutMachineController : MonoBehaviour, IController
         }
 
         rotationOnlySync.GetComponent<MeshRenderer>().enabled = true;
+    }
+
+    private void ToggleHandler()
+    {
+        xRKnobMeshRenderer.enabled = false;
+        for (int i = 0; i < xRKnobColliders.Length; i++)
+        {
+            xRKnobColliders[i].enabled = false;
+        }
+
+        xRKnob.enabled = false;
+        rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
+
+        xRGrabInteractable.GetComponent<MeshRenderer>().enabled = true;
+        var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
+        for (int i = 0; i < xRGrabInteractableBoxcolliders.Length; i++)
+        {
+            xRGrabInteractableBoxcolliders[i].enabled = true;
+        }
+
+        handlerRb.useGravity = true;
+        xRGrabInteractable.enabled = true;
+        waistSlotItem.enabled = true; // 启用，让回家逻辑正常工作
     }
 
     public void LockTurnout(SelectEnterEventArgs args)
@@ -155,6 +191,13 @@ public class TurnoutMachineController : MonoBehaviour, IController
             this.SendCommand<ToggleTurnoutLockToNormalCommand>(new ToggleTurnoutLockToNormalCommand(turnoutID));
         else
             this.SendCommand<ToggleTurnoutLockToReverseCommand>(new ToggleTurnoutLockToReverseCommand(turnoutID));
+
+        // 🔥 禁用 Socket
+        if (handlerSocketInteractor != null)
+        {
+            handlerSocketInteractor.enabled = false;
+        }
+
         Debug.Log("TurnoutLock:" +
                   this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState);
     }
@@ -166,6 +209,13 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
         animator.SetBool(lockTurnoutTag, false);
         this.SendCommand<ToggleTurnoutLockToNothingCommand>(new ToggleTurnoutLockToNothingCommand(turnoutID));
+
+        // 🔥 启用 Socket
+        if (handlerSocketInteractor != null)
+        {
+            handlerSocketInteractor.enabled = true;
+        }
+
         Debug.Log("TurnoutLock:" +
                   this.GetModel<TurnoutModel>().currentRoute.Value.turnoutMachines[turnoutID].LockedState);
     }
@@ -241,29 +291,6 @@ public class TurnoutMachineController : MonoBehaviour, IController
         }
     }
 
-    private void ToggleHandler()
-    {
-        xRKnobMeshRenderer.enabled = false;
-        for (int i = 0; i < xRKnobColliders.Length; i++)
-        {
-            xRKnobColliders[i].enabled = false;
-        }
-
-
-        xRKnob.enabled = false;
-        rotationOnlySync.transform.GetComponent<MeshRenderer>().enabled = false;
-
-        xRGrabInteractable.GetComponent<MeshRenderer>().enabled = true;
-        var xRGrabInteractableBoxcolliders = xRGrabInteractable.GetComponents<BoxCollider>();
-        for (int i = 0; i < xRGrabInteractableBoxcolliders.Length; i++)
-        {
-            xRGrabInteractableBoxcolliders[i].enabled = true;
-        }
-
-        handlerRb.useGravity = true;
-        waistSlotItem.enabled = false;
-        xRGrabInteractable.enabled = true;
-    }
 
     private void PlayCutPowerAnimator()
     {

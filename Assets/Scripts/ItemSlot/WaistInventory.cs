@@ -41,7 +41,7 @@ public class WaistInventory : MonoBehaviour
 
         if (slot.currentItem != null && slot.currentItem != item)
         {
-            Debug.LogWarning($"槽位 '{slot.slotID}' 被强制替换");
+            // Debug.LogWarning($"槽位 '{slot.slotID}' 被强制替换");
             slot.currentItem.ReleaseSlot();
         }
 
@@ -76,13 +76,13 @@ public class WaistInventory : MonoBehaviour
             
             if (string.IsNullOrEmpty(slot.slotID))
             {
-                Debug.LogError($"[{slot.name}] slotID 未设置！", slot);
+                // Debug.LogError($"[{slot.name}] slotID 未设置！", slot);
                 continue;
             }
             
             if (!ids.Add(slot.slotID))
             {
-                Debug.LogError($"重复的 slotID: '{slot.slotID}'", slot);
+                // Debug.LogError($"重复的 slotID: '{slot.slotID}'", slot);
             }
         }
     }

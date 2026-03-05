@@ -61,13 +61,13 @@ public class UIAutoSound : MonoBehaviour, IController
         _lastHoverTime = Time.time;
 
         _audioManager?.PlayButtonHoverSound();
-        Debug.Log("[UIAutoSound] Hover");
+        // Debug.Log("[UIAutoSound] Hover");
     }
 
     void PlayClickSound()
     {
         _audioManager?.PlayButtonClickSound();
-        Debug.Log("[UIAutoSound] Click");
+        // Debug.Log("[UIAutoSound] Click");
     }
 
     public IArchitecture GetArchitecture()

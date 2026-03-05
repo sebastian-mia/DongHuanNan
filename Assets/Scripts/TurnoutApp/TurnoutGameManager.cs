@@ -133,6 +133,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private void CreateTargetRoute()
     {
         randomNum = this.GetUtility<RandomNumber>().Range(1, this.GetModel<TurnoutModel>().routeCount);
+        Debug.Log("randomNum:" + randomNum);
         // randomNum = 1;
         targetRoute = UIManager.Instance.ShowUI(targetRouteTip);
         if (randomNum == 1)

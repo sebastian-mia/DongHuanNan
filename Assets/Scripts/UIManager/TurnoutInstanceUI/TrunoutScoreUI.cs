@@ -113,7 +113,6 @@ public class TrunoutScoreUI : MonoBehaviour, IController
         // turnoutModel.targetRoute.Value = null;
         // turnoutModel.currentRoute.Value = null;
         turnoutModel.counterTime = "00:00";
-        turnoutModel.routeCount = 0;
         turnoutModel.isCorrectRoute = false;
         gameRecordModel.UserId = null;
         gameRecordModel.currentprojectId = 0;
