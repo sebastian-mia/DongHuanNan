@@ -49009,6 +49009,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Turnout01MachineCombine
       objectReference: {fileID: 0}
+    - target: {fileID: 8302385157809139658, guid: bdb1aec3f3e12f844b0c6e0e4e250b3e,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 2484314621150859213, guid: bdb1aec3f3e12f844b0c6e0e4e250b3e, type: 3}
@@ -51379,6 +51384,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Turnout02MachineCombine
+      objectReference: {fileID: 0}
+    - target: {fileID: 3535404077430286645, guid: 862fa53b4997ea04080f1ec76b566b1a,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8398823240762627937, guid: 862fa53b4997ea04080f1ec76b566b1a,
         type: 3}

@@ -21,6 +21,7 @@ public class MenuUIController : MonoBehaviour, IController
     private readonly string TurnoutProjectScorePanelTag = "TurnoutProjectScorePanel";
     private readonly string ToggleProjectScorePanelTag = "ToggleProjectScorePanel";
     private readonly string InfoPanelTag = "InfoPanel";
+    private readonly string ControlPraticeButtonPanelTag = "ControlPraticeButtonPanel";
 
 
     //Panel
@@ -32,6 +33,7 @@ public class MenuUIController : MonoBehaviour, IController
     private LocomotionModePanel locomotionModePanel;
     private UserIdPanel userIdPanel;
     private InfoPanel infoPanel;
+    private ControlPraticeButtonPanel controlPraticeButtonPanel;
 
     //Index
     private int turnoutProjectButtonIndex;
@@ -54,7 +56,14 @@ public class MenuUIController : MonoBehaviour, IController
             startMenuPanel.settingButton.onClick.AddListener(ShowLocomotionModePanel);
             startMenuPanel.boardButton.onClick.AddListener(ShowToggleProjectScorePanel);
             startMenuPanel.infoButton.onClick.AddListener(ShowInfoPanel);
+            startMenuPanel.controlPracticeButton.onClick.AddListener(ShowControlPraticeButtonPanel);
         }
+    }
+
+    private void ShowControlPraticeButtonPanel()
+    {
+        controlPraticeButtonPanel = UIManager.Instance.PushUI(ControlPraticeButtonPanelTag)
+            .GetComponent<ControlPraticeButtonPanel>();
     }
 
     private void ShowInfoPanel()

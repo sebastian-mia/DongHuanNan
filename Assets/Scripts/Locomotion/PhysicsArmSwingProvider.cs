@@ -312,21 +312,21 @@ public class PhysicsArmSwingProvider : LocomotionProvider
         rightTriggerAction?.action?.Disable();
     }
 
-    void OnGUI()
-    {
-        if (!initialized) return;
-        
-        GUILayout.BeginArea(new Rect(10, 10, 250, 180));
-        GUILayout.Label($"=== Arm Swing ===");
-        GUILayout.Label($"Require Trigger: {requireTriggerPressed}");
-        if (requireTriggerPressed)
-        {
-            GUILayout.Label($"L Trigger: {leftTriggerPressed}");
-            GUILayout.Label($"R Trigger: {rightTriggerPressed}");
-        }
-        GUILayout.Label($"Current Speed: {currentSpeed:F2}");
-        GUILayout.Label($"Is Moving: {m_IsMoving}");
-        GUILayout.Label($"Phase: {locomotionPhase}");
-        GUILayout.EndArea();
-    }
+    // void OnGUI()
+    // {
+    //     if (!initialized) return;
+    //     
+    //     GUILayout.BeginArea(new Rect(10, 10, 250, 180));
+    //     GUILayout.Label($"=== Arm Swing ===");
+    //     GUILayout.Label($"Require Trigger: {requireTriggerPressed}");
+    //     if (requireTriggerPressed)
+    //     {
+    //         GUILayout.Label($"L Trigger: {leftTriggerPressed}");
+    //         GUILayout.Label($"R Trigger: {rightTriggerPressed}");
+    //     }
+    //     GUILayout.Label($"Current Speed: {currentSpeed:F2}");
+    //     GUILayout.Label($"Is Moving: {m_IsMoving}");
+    //     GUILayout.Label($"Phase: {locomotionPhase}");
+    //     GUILayout.EndArea();
+    // }
 }
