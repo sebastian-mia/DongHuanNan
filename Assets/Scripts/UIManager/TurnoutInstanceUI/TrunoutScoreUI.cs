@@ -110,12 +110,11 @@ public class TrunoutScoreUI : MonoBehaviour, IController
         turnoutModel.nodeValues.Clear();
         turnoutModel.scorePanelIndex = 0;
         turnoutModel.currentsubProjectName = null;
-        // turnoutModel.targetRoute.Value = null;
-        // turnoutModel.currentRoute.Value = null;
-        turnoutModel.counterTime = "00:00";
         turnoutModel.isCorrectRoute = false;
+        turnoutModel.ResetValues();
         gameRecordModel.UserId = null;
         gameRecordModel.currentprojectId = 0;
+
 
         VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }

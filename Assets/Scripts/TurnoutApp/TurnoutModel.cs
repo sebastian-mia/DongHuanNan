@@ -33,4 +33,23 @@ public class TurnoutModel : AbstractModel
         currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout06,
             new TurnoutMachine(TurnoutID.Turnout06, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
     }
+
+    public void ResetValues()
+    {
+        routeCount = 10;
+        counterTime = "00:00";
+        currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行入库));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout01,
+            new TurnoutMachine(TurnoutID.Turnout01, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout02,
+            new TurnoutMachine(TurnoutID.Turnout02, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout03,
+            new TurnoutMachine(TurnoutID.Turnout03, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.反位));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout04,
+            new TurnoutMachine(TurnoutID.Turnout04, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout05,
+            new TurnoutMachine(TurnoutID.Turnout05, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.反位));
+        currentRoute.Value.turnoutMachines.Add(TurnoutID.Turnout06,
+            new TurnoutMachine(TurnoutID.Turnout06, LockedState.未加锁, IsPowerCut.未断电, TurnoutState.定位));
+    }
 }

@@ -2359,6 +2359,8 @@ MonoBehaviour:
   inputDeviceCharacteristics: 256
   pokeAttachTransform: {fileID: 1136772218859966988}
   directAttachTransform: {fileID: 3924186195475769703}
+  animationResponseSpeed: 0
+  handMesh: {fileID: 1001514755746369409}
 --- !u!1 &8093740966086857960
 GameObject:
   m_ObjectHideFlags: 0

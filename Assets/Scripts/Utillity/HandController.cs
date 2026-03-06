@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.XR;
 using InputDevice = UnityEngine.XR.InputDevice;
 
 public class HandController : MonoBehaviour
@@ -15,6 +14,11 @@ public class HandController : MonoBehaviour
     [Header("Attach Transforms")]
     public Transform pokeAttachTransform;
     public Transform directAttachTransform;
+
+    [Header("Animation Settings")]
+    [Tooltip("0 = 无延迟即时响应, 0.1 = 轻微平滑")]
+    [Range(0f, 0.2f)]
+    public float animationResponseSpeed = 0f;
 
     // 组件引用
     private Animator handAnimator;
@@ -28,6 +32,15 @@ public class HandController : MonoBehaviour
     // 状态值
     private float currentTriggerValue = 0f;
     private float currentGripValue = 0f;
+    private float targetTriggerValue = 0f;
+    private float targetGripValue = 0f;
+    private bool isSelecting = false;
+
+    // 缓存默认 attachTransform
+    private Transform defaultAttachTransform;
+
+    // 静态字典存储实例
+    private static Dictionary<InputDeviceCharacteristics, HandController> instances = new Dictionary<InputDeviceCharacteristics, HandController>();
 
     // 事件定义
     public static event Action<HandController, float> OnTriggerChanged;
@@ -36,183 +49,189 @@ public class HandController : MonoBehaviour
 
     void Awake()
     {
-        directInteractor = GetComponentInChildren<XRDirectInteractor>();
-        handAnimator = GetComponent<Animator>();
+        // 单例检查
+        if (instances.TryGetValue(inputDeviceCharacteristics, out HandController existing))
+        {
+            if (existing != null && existing != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+        }
         
-        // 初始化输入动作
+        instances[inputDeviceCharacteristics] = this;
+        
+        directInteractor = GetComponentInChildren<XRDirectInteractor>();
+        handAnimator = GetComponentInChildren<Animator>();
+        
+        // 缓存默认 attachTransform
+        if (directInteractor != null)
+        {
+            defaultAttachTransform = directInteractor.attachTransform;
+        }
+        
+        // 监听抓取事件
+        if (directInteractor != null)
+        {
+            directInteractor.selectEntered.AddListener(OnSelectEntered);
+            directInteractor.selectExited.AddListener(OnSelectExited);
+        }
+        
         InitializeInputActions();
+    }
+
+    void Update()
+    {
+        // 每帧直接读取输入 - 最低延迟
+        ReadInputImmediate();
+        
+        // 更新动画
+        UpdateAnimationImmediate();
     }
 
     void OnEnable()
     {
-        // 启用输入动作并订阅事件
         triggerAction?.Enable();
         gripAction?.Enable();
         
-        // 订阅设备连接事件
         InputDevices.deviceConnected += OnDeviceConnected;
         InputDevices.deviceDisconnected += OnDeviceDisconnected;
         
-        // 尝试初始化设备
         TryInitializeDevice();
+        
+        // 恢复时强制刷新动画参数，防止系统隐藏/显示后动画重置
+        if (handAnimator != null)
+        {
+            handAnimator.SetFloat("Trigger", currentTriggerValue);
+            handAnimator.SetFloat("Grab", currentGripValue);
+            handAnimator.Update(0);
+        }
     }
 
     void OnDisable()
     {
-        // 禁用输入动作
         triggerAction?.Disable();
         gripAction?.Disable();
         
-        // 取消订阅设备事件
         InputDevices.deviceConnected -= OnDeviceConnected;
         InputDevices.deviceDisconnected -= OnDeviceDisconnected;
+    }
+
+    void OnDestroy()
+    {
+        if (instances.TryGetValue(inputDeviceCharacteristics, out HandController current) && current == this)
+        {
+            instances.Remove(inputDeviceCharacteristics);
+        }
         
-        // 取消订阅输入事件
-        if (triggerAction != null)
-            triggerAction.performed -= OnTriggerPerformed;
-        if (triggerAction != null)
-            triggerAction.canceled -= OnTriggerCanceled;
+        if (directInteractor != null)
+        {
+            directInteractor.selectEntered.RemoveListener(OnSelectEntered);
+            directInteractor.selectExited.RemoveListener(OnSelectExited);
+        }
+    }
+
+    // 立即读取输入，无回调延迟
+    private void ReadInputImmediate()
+    {
+        if (triggerAction != null && triggerAction.enabled)
+        {
+            targetTriggerValue = triggerAction.ReadValue<float>();
+        }
+        
+        if (gripAction != null && gripAction.enabled)
+        {
+            targetGripValue = gripAction.ReadValue<float>();
+        }
+    }
+
+    // 即时动画更新
+    private void UpdateAnimationImmediate()
+    {
+        // 检测变化
+        bool triggerChanged = !Mathf.Approximately(currentTriggerValue, targetTriggerValue);
+        bool gripChanged = !Mathf.Approximately(currentGripValue, targetGripValue);
+        
+        if (!triggerChanged && !gripChanged) return;
+        
+        // 即时或快速插值到目标值
+        if (animationResponseSpeed <= 0f)
+        {
+            // 完全即时 - 零延迟
+            if (triggerChanged)
+            {
+                currentTriggerValue = targetTriggerValue;
+                handAnimator?.SetFloat("Trigger", currentTriggerValue);
+                OnTriggerChanged?.Invoke(this, currentTriggerValue);
+            }
             
-        if (gripAction != null)
-            gripAction.performed -= OnGripPerformed;
-        if (gripAction != null)
-            gripAction.canceled -= OnGripCanceled;
-    }
-
-    // 初始化输入动作系统
-    private void InitializeInputActions()
-    {
-        // 根据设备特征确定左右手
-        bool isLeftHand = (inputDeviceCharacteristics & InputDeviceCharacteristics.Left) != 0;
-        string handName = isLeftHand ? "LeftHand" : "RightHand";
-        
-        // 创建触发器动作
-        triggerAction = new InputAction(
-            name: $"{handName}Trigger",
-            type: InputActionType.Value,
-            binding: $"<XRController>{{{handName}}}/trigger"
-        );
-        
-        // 创建握把动作
-        gripAction = new InputAction(
-            name: $"{handName}Grip",
-            type: InputActionType.Value,
-            binding: $"<XRController>{{{handName}}}/grip"
-        );
-        
-        // 订阅输入事件
-        triggerAction.performed += OnTriggerPerformed;
-        triggerAction.canceled += OnTriggerCanceled;
-        
-        gripAction.performed += OnGripPerformed;
-        gripAction.canceled += OnGripCanceled;
-    }
-
-    // 尝试初始化设备
-    private void TryInitializeDevice()
-    {
-        List<InputDevice> devices = new List<InputDevice>();
-        InputDevices.GetDevicesWithCharacteristics(inputDeviceCharacteristics, devices);
-        
-        if (devices.Count > 0 && !targetDevice.isValid)
-        {
-            targetDevice = devices[0];
-            Debug.Log($"[HandController] 设备初始化成功: {targetDevice.name}");
+            if (gripChanged)
+            {
+                currentGripValue = targetGripValue;
+                handAnimator?.SetFloat("Grab", currentGripValue);
+                OnGripChanged?.Invoke(this, currentGripValue);
+            }
         }
-    }
-
-    // 设备连接事件
-    private void OnDeviceConnected(InputDevice device)
-    {
-        if ((device.characteristics & inputDeviceCharacteristics) == inputDeviceCharacteristics)
+        else
         {
-            targetDevice = device;
-            Debug.Log($"[HandController] 设备已连接: {device.name}");
-        }
-    }
-
-    // 设备断开事件
-    private void OnDeviceDisconnected(InputDevice device)
-    {
-        if (device == targetDevice)
-        {
-            targetDevice = default;
-            Debug.Log($"[HandController] 设备已断开");
+            // 极快插值 - 视觉平滑但响应迅速
+            float delta = Time.deltaTime / animationResponseSpeed;
             
-            // 重置状态
-            UpdateTriggerValue(0f);
-            UpdateGripValue(0f);
+            if (triggerChanged)
+            {
+                currentTriggerValue = Mathf.MoveTowards(currentTriggerValue, targetTriggerValue, delta);
+                handAnimator?.SetFloat("Trigger", currentTriggerValue);
+                
+                if (Mathf.Approximately(currentTriggerValue, targetTriggerValue))
+                    OnTriggerChanged?.Invoke(this, currentTriggerValue);
+            }
+            
+            if (gripChanged)
+            {
+                currentGripValue = Mathf.MoveTowards(currentGripValue, targetGripValue, delta);
+                handAnimator?.SetFloat("Grab", currentGripValue);
+                
+                if (Mathf.Approximately(currentGripValue, targetGripValue))
+                    OnGripChanged?.Invoke(this, currentGripValue);
+            }
+        }
+        
+        // 只在非抓取状态下更新 attachTransform
+        if (!isSelecting && (triggerChanged || gripChanged))
+        {
+            UpdateAttachTransform();
         }
     }
 
-    // 触发器按下/变化事件
-    private void OnTriggerPerformed(InputAction.CallbackContext context)
+    private void OnSelectEntered(SelectEnterEventArgs args)
     {
-        float value = context.ReadValue<float>();
-        UpdateTriggerValue(value);
+        isSelecting = true;
+        
+        // 抓取前重置 attachTransform 为默认值，防止变形
+        if (directInteractor != null && defaultAttachTransform != null)
+        {
+            directInteractor.attachTransform = defaultAttachTransform;
+        }
+        
+        // 注意：隐藏由系统控制（XRDirectInteractor.hideControllerOnSelect）
     }
 
-    // 触发器释放事件
-    private void OnTriggerCanceled(InputAction.CallbackContext context)
+    private void OnSelectExited(SelectExitEventArgs args)
     {
-        UpdateTriggerValue(0f);
-    }
-
-    // 握把按下/变化事件
-    private void OnGripPerformed(InputAction.CallbackContext context)
-    {
-        float value = context.ReadValue<float>();
-        UpdateGripValue(value);
-    }
-
-    // 握把释放事件
-    private void OnGripCanceled(InputAction.CallbackContext context)
-    {
-        UpdateGripValue(0f);
-    }
-
-    // 更新触发器值
-    private void UpdateTriggerValue(float value)
-    {
-        if (Mathf.Approximately(currentTriggerValue, value)) return;
+        isSelecting = false;
         
-        currentTriggerValue = value;
-        
-        // 更新动画
-        handAnimator?.SetFloat("Trigger", value);
-        
-        // 触发全局事件
-        OnTriggerChanged?.Invoke(this, value);
-        
-        // 更新AttachTransform
+        // 恢复时重新评估 attachTransform
         UpdateAttachTransform();
+        
+        // 注意：显示由系统控制（XRDirectInteractor.hideControllerOnSelect）
     }
 
-    // 更新握把值
-    private void UpdateGripValue(float value)
-    {
-        if (Mathf.Approximately(currentGripValue, value)) return;
-        
-        currentGripValue = value;
-        
-        // 更新动画
-        handAnimator?.SetFloat("Grab", value);
-        
-        // 触发全局事件
-        OnGripChanged?.Invoke(this, value);
-        
-        // 更新AttachTransform
-        UpdateAttachTransform();
-    }
-
-    // 更新AttachTransform（基于当前状态）
     private void UpdateAttachTransform()
     {
-        if (directInteractor == null) return;
+        if (directInteractor == null || isSelecting) return;
         
         Transform newAttachTransform = null;
         
-        // 优先级逻辑：都按下时使用direct，否则根据单独按键，都没按下时为null
         if (currentTriggerValue >= 0.9f && currentGripValue >= 0.9f)
         {
             newAttachTransform = directAttachTransform;
@@ -225,8 +244,12 @@ public class HandController : MonoBehaviour
         {
             newAttachTransform = pokeAttachTransform;
         }
+        else
+        {
+            // 无输入时恢复默认
+            newAttachTransform = defaultAttachTransform;
+        }
         
-        // 只有变化时才设置
         if (directInteractor.attachTransform != newAttachTransform)
         {
             directInteractor.attachTransform = newAttachTransform;
@@ -234,10 +257,65 @@ public class HandController : MonoBehaviour
         }
     }
 
-    // 公共属性供外部访问
+    private void InitializeInputActions()
+    {
+        bool isLeftHand = (inputDeviceCharacteristics & InputDeviceCharacteristics.Left) != 0;
+        string handName = isLeftHand ? "LeftHand" : "RightHand";
+        
+        // 使用 PassThrough 类型获得最低延迟
+        triggerAction = new InputAction(
+            name: $"{handName}Trigger",
+            type: InputActionType.PassThrough,
+            binding: $"<XRController>{{{handName}}}/trigger"
+        );
+        
+        gripAction = new InputAction(
+            name: $"{handName}Grip",
+            type: InputActionType.PassThrough,
+            binding: $"<XRController>{{{handName}}}/grip"
+        );
+        
+        // 可选：设置更新模式为动态更新
+        triggerAction.actionMap?.Enable();
+    }
+
+    private void TryInitializeDevice()
+    {
+        List<InputDevice> devices = new List<InputDevice>();
+        InputDevices.GetDevicesWithCharacteristics(inputDeviceCharacteristics, devices);
+        
+        if (devices.Count > 0 && !targetDevice.isValid)
+        {
+            targetDevice = devices[0];
+            Debug.Log($"[HandController] 设备初始化成功: {targetDevice.name}");
+        }
+    }
+
+    private void OnDeviceConnected(InputDevice device)
+    {
+        if ((device.characteristics & inputDeviceCharacteristics) == inputDeviceCharacteristics)
+        {
+            targetDevice = device;
+            Debug.Log($"[HandController] 设备已连接: {device.name}");
+        }
+    }
+
+    private void OnDeviceDisconnected(InputDevice device)
+    {
+        if (device == targetDevice)
+        {
+            targetDevice = default;
+            targetTriggerValue = 0f;
+            targetGripValue = 0f;
+            Debug.Log($"[HandController] 设备已断开");
+        }
+    }
+
+    // 公共属性
     public float TriggerValue => currentTriggerValue;
     public float GripValue => currentGripValue;
     public bool IsTriggerPressed => currentTriggerValue >= 0.9f;
     public bool IsGripPressed => currentGripValue >= 0.9f;
+    public bool IsSelecting => isSelecting;
     public InputDeviceCharacteristics DeviceCharacteristics => inputDeviceCharacteristics;
 }
