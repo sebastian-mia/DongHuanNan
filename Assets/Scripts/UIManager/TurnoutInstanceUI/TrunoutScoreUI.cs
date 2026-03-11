@@ -20,6 +20,12 @@ public class TrunoutScoreUI : MonoBehaviour, IController
     private TurnoutRecordModel turnoutRecordModel;
     private GameRecordModel gameRecordModel;
     private int projectId;
+    private AudioManager audioManager;
+
+    void Start()
+    {
+        audioManager = this.GetUtility<AudioManager>();
+    }
 
     private void OnEnable()
     {
@@ -102,20 +108,18 @@ public class TrunoutScoreUI : MonoBehaviour, IController
 
     private void ReturnMenuScene()
     {
+        if (audioManager != null)
+        {
+            audioManager.StopAllSounds();
+        }
+
         for (int i = 0; i < content.childCount; i++)
         {
             Destroy(content.GetChild(i).gameObject);
         }
 
-        turnoutModel.nodeValues.Clear();
-        turnoutModel.scorePanelIndex = 0;
-        turnoutModel.currentsubProjectName = null;
-        turnoutModel.isCorrectRoute = false;
         turnoutModel.ResetValues();
-        gameRecordModel.UserId = null;
-        gameRecordModel.currentprojectId = 0;
-
-
+        gameRecordModel.ResetValues();
         VRSceneManager.Instance.SwitchSceneAsync("MenuScene");
     }
 

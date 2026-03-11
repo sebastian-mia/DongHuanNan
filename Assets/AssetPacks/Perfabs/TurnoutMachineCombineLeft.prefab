@@ -254,7 +254,7 @@ MonoBehaviour:
   m_Handle: {fileID: 7034901015199449163}
   m_Value: 0
   m_ClampedMotion: 1
-  m_MaxAngle: 4096
+  m_MaxAngle: 8192
   m_MinAngle: 0
   m_AngleIncrement: 0
   m_PositionTrackedRadius: 0

@@ -36,7 +36,7 @@ public class VRSceneManager : MonoBehaviour, IController
     [SerializeField] private bool autoMoveToSpawnPoint = true;
 
     [Header("Fade Settings")] [SerializeField]
-    private float fadeInDuration = 0.8f;
+    private float fadeInDuration = 3f;
 
     [SerializeField] private int blackScreenFrames = 2;
 
@@ -204,7 +204,7 @@ public class VRSceneManager : MonoBehaviour, IController
         SetControllersVisible(visible);
     }
 
-    // ========== 其他方法保持不变，但移除 hasCachedObjects 相关逻辑 ==========
+    // ========== 其他方法保持不变 ==========
 
     public async Task LoadSceneAsync(string sceneName, bool setActive = true, bool showLoading = true)
     {
@@ -298,8 +298,16 @@ public class VRSceneManager : MonoBehaviour, IController
             Physics.SyncTransforms();
             await Task.Yield();
 
+            // 🔥 关键：先显示腰部插槽和手部，再 Fade
             ChooseWaistSlotsByProjectId();
             CheckAndApplyMovementRestriction(sceneName);
+            
+            // 🔥 立即显示手部
+            SetControllersVisible(true);
+
+            // 短暂等待确保渲染
+            await Task.Yield();
+            await Task.Yield();
 
             if (showLoading)
             {
@@ -318,9 +326,27 @@ public class VRSceneManager : MonoBehaviour, IController
         {
             isLoading = false;
 
-            // 🔥 场景加载完成后，控制器应该已存在，强制刷新后显示
-            ForceRefreshControllers();
-            SetControllersVisible(true);
+            // 🔥 异常保护：确保显示（不做强制刷新，避免覆盖）
+            if (turnoutWaistSlots != null && turnoutWaistSlots.transform.localScale == Vector3.zero)
+            {
+                Debug.LogWarning("[VRSceneManager] 异常保护：重新显示 Slots");
+                ChooseWaistSlotsByProjectId();
+            }
+            
+            // 🔥 异常保护：手部显示（不做强制刷新）
+            if (!ControllersCached)
+            {
+                Debug.LogWarning("[VRSceneManager] 异常保护：尝试查找控制器");
+                FindAndCacheControllers();
+            }
+            if (leftController != null && leftController.transform.localScale == Vector3.zero)
+            {
+                leftController.transform.localScale = leftControllerOriginalScale;
+            }
+            if (rightController != null && rightController.transform.localScale == Vector3.zero)
+            {
+                rightController.transform.localScale = rightControllerOriginalScale;
+            }
 
             if (disableMovementDuringLoading)
             {
@@ -346,6 +372,9 @@ public class VRSceneManager : MonoBehaviour, IController
         ForceRefreshControllers();
         SetControllersVisible(false);
         SetLocomotionEnabled(false);
+        
+        // 🔥 关键：强制隐藏 Slots，然后根据新项目判断
+        HideSlots();
 
         try
         {
@@ -427,8 +456,16 @@ public class VRSceneManager : MonoBehaviour, IController
             Physics.SyncTransforms();
             await Task.Yield();
 
+            // 🔥 关键：根据新项目判断是否显示 Slots
             ChooseWaistSlotsByProjectId();
             CheckAndApplyMovementRestriction(newSceneName);
+            
+            // 🔥 立即显示手部
+            SetControllersVisible(true);
+
+            // 短暂等待确保渲染
+            await Task.Yield();
+            await Task.Yield();
 
             var fadeTask = FadeFromBlack();
             loadingScreen?.HideImmediate();
@@ -445,9 +482,27 @@ public class VRSceneManager : MonoBehaviour, IController
         {
             isLoading = false;
 
-            // 🔥 关键：新场景加载后，XR控制器已重新创建，必须强制刷新
-            ForceRefreshControllers();
-            SetControllersVisible(true);
+            // 🔥 异常保护：确保显示（不做强制刷新，避免覆盖）
+            if (turnoutWaistSlots != null && turnoutWaistSlots.transform.localScale == Vector3.zero)
+            {
+                Debug.LogWarning("[VRSceneManager] 异常保护：重新显示 Slots");
+                ChooseWaistSlotsByProjectId();
+            }
+            
+            // 🔥 异常保护：手部显示（不做强制刷新）
+            if (!ControllersCached)
+            {
+                Debug.LogWarning("[VRSceneManager] 异常保护：尝试查找控制器");
+                FindAndCacheControllers();
+            }
+            if (leftController != null && leftController.transform.localScale == Vector3.zero)
+            {
+                leftController.transform.localScale = leftControllerOriginalScale;
+            }
+            if (rightController != null && rightController.transform.localScale == Vector3.zero)
+            {
+                rightController.transform.localScale = rightControllerOriginalScale;
+            }
 
             if (isMovementRestricted)
             {
@@ -679,11 +734,13 @@ public class VRSceneManager : MonoBehaviour, IController
     {
         if (turnoutWaistSlots == null) return;
 
-        if (turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId) != null)
+        // 🔥 先获取项目名称（判空）
+        string projectName = turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId);
+        
+        if (projectName != null)
         {
-            Debug.Log("ProjectName:" + turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId));
-            bool shouldShow = turnoutDatabaseManager.GetProjectName(gameRecordModel.currentprojectId)
-                .Contains(ProjectName.人工准备进路.ToString());
+            Debug.Log("ProjectName:" + projectName);
+            bool shouldShow = projectName.Contains(ProjectName.人工准备进路.ToString());
 
             if (shouldShow)
             {
@@ -693,12 +750,14 @@ public class VRSceneManager : MonoBehaviour, IController
             else
             {
                 HideSlots();
-                Debug.Log("[VRSceneManager] Slots 已隐藏（缩放为0）");
+                Debug.Log("[VRSceneManager] Slots 已隐藏（缩放为0），项目不匹配");
             }
         }
         else
         {
+            // 🔥 项目名为空，强制隐藏
             HideSlots();
+            Debug.Log("[VRSceneManager] Slots 已隐藏（缩放为0），项目名为空");
         }
     }
 

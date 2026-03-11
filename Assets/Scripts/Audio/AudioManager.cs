@@ -132,6 +132,10 @@ public class AudioManager : IUtility
         AudioKit.PlaySound(grabItemInWaistSlotsSoundPath);
     }
 
+    public void StopAllSounds()
+    {
+        AudioKit.StopAllSound();
+    }
 
     private void PlayBackGroundMusic(string path)
     {
@@ -147,6 +151,7 @@ public class AudioManager : IUtility
     {
         AudioKit.PlaySound(path, playSoundMode: AudioKit.PlaySoundModes.IgnoreSameSoundInSoundFrames);
     }
+
 
     /// <summary>
     /// 添加多个语音到队列

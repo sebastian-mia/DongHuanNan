@@ -11,4 +11,10 @@ public class GameRecordModel : AbstractModel
         UserId = "";
         IsSecordToMainMenu = false;
     }
+
+    public void ResetValues()
+    {
+        UserId = null;
+        currentprojectId = 0;
+    }
 }

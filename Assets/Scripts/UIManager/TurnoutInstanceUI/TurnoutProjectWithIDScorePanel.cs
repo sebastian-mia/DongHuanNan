@@ -16,6 +16,8 @@ public class TurnoutProjectWithIDScorePanel : MonoBehaviour, IController
     public Button returnPerUIButton;
     private TurnoutDatabaseManager turnoutDatabaseManager;
     private int ButtonIndex;
+    private List<TurnoutNodeData> turnoutNodeDatas;
+    private GameObject showMessageTag;
 
     private void OnEnable()
     {
@@ -33,7 +35,7 @@ public class TurnoutProjectWithIDScorePanel : MonoBehaviour, IController
     {
         projectName.text = subProjectName;
         counterTimeText.text = counterTime;
-        var turnoutNodeDatas = turnoutDatabaseManager.GetNodesBySubProject(subProjectName, userId, time);
+        turnoutNodeDatas = turnoutDatabaseManager.GetNodesBySubProject(subProjectName, userId, time);
         ShowNodeValue(turnoutNodeDatas);
     }
 
@@ -80,6 +82,8 @@ public class TurnoutProjectWithIDScorePanel : MonoBehaviour, IController
         {
             Destroy(content.GetChild(i).gameObject);
         }
+
+        turnoutNodeDatas.Clear();
 
         UIManager.Instance.PopUI();
     }

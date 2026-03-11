@@ -64,18 +64,18 @@ public class HandController : MonoBehaviour
         directInteractor = GetComponentInChildren<XRDirectInteractor>();
         handAnimator = GetComponentInChildren<Animator>();
         
-        // 缓存默认 attachTransform
-        if (directInteractor != null)
-        {
-            defaultAttachTransform = directInteractor.attachTransform;
-        }
+        // // 缓存默认 attachTransform
+        // if (directInteractor != null)
+        // {
+        //     defaultAttachTransform = directInteractor.attachTransform;
+        // }
         
         // 监听抓取事件
-        if (directInteractor != null)
-        {
-            directInteractor.selectEntered.AddListener(OnSelectEntered);
-            directInteractor.selectExited.AddListener(OnSelectExited);
-        }
+        // if (directInteractor != null)
+        // {
+        //     directInteractor.selectEntered.AddListener(OnSelectEntered);
+        //     directInteractor.selectExited.AddListener(OnSelectExited);
+        // }
         
         InitializeInputActions();
     }
@@ -124,11 +124,11 @@ public class HandController : MonoBehaviour
             instances.Remove(inputDeviceCharacteristics);
         }
         
-        if (directInteractor != null)
-        {
-            directInteractor.selectEntered.RemoveListener(OnSelectEntered);
-            directInteractor.selectExited.RemoveListener(OnSelectExited);
-        }
+        // if (directInteractor != null)
+        // {
+        //     directInteractor.selectEntered.RemoveListener(OnSelectEntered);
+        //     directInteractor.selectExited.RemoveListener(OnSelectExited);
+        // }
     }
 
     // 立即读取输入，无回调延迟
@@ -203,28 +203,28 @@ public class HandController : MonoBehaviour
         }
     }
 
-    private void OnSelectEntered(SelectEnterEventArgs args)
-    {
-        isSelecting = true;
-        
-        // 抓取前重置 attachTransform 为默认值，防止变形
-        if (directInteractor != null && defaultAttachTransform != null)
-        {
-            directInteractor.attachTransform = defaultAttachTransform;
-        }
-        
-        // 注意：隐藏由系统控制（XRDirectInteractor.hideControllerOnSelect）
-    }
+    // private void OnSelectEntered(SelectEnterEventArgs args)
+    // {
+    //     isSelecting = true;
+    //     
+    //     // 抓取前重置 attachTransform 为默认值，防止变形
+    //     if (directInteractor != null && defaultAttachTransform != null)
+    //     {
+    //         directInteractor.attachTransform = defaultAttachTransform;
+    //     }
+    //     
+    //     // 注意：隐藏由系统控制（XRDirectInteractor.hideControllerOnSelect）
+    // }
 
-    private void OnSelectExited(SelectExitEventArgs args)
-    {
-        isSelecting = false;
-        
-        // 恢复时重新评估 attachTransform
-        UpdateAttachTransform();
-        
-        // 注意：显示由系统控制（XRDirectInteractor.hideControllerOnSelect）
-    }
+    // private void OnSelectExited(SelectExitEventArgs args)
+    // {
+    //     isSelecting = false;
+    //     
+    //     // 恢复时重新评估 attachTransform
+    //     UpdateAttachTransform();
+    //     
+    //     // 注意：显示由系统控制（XRDirectInteractor.hideControllerOnSelect）
+    // }
 
     private void UpdateAttachTransform()
     {

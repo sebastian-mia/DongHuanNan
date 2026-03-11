@@ -171,6 +171,7 @@ public class MenuUIController : MonoBehaviour, IController
                 if (enumUtils.GetValues<Line1StationName>()[i].ToString()
                     .Contains(turnoutProjectPanel.stationInputField.text))
                 {
+                    this.GetUtility<AudioManager>().StopAllSounds();
                     VRSceneManager.Instance.SwitchSceneAsync(turnoutProjectPanel.stationInputField.text);
                 }
             }

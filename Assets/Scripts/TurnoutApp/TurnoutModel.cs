@@ -36,6 +36,10 @@ public class TurnoutModel : AbstractModel
 
     public void ResetValues()
     {
+        nodeValues.Clear();
+        scorePanelIndex = 0;
+        currentsubProjectName = null;
+        isCorrectRoute = false;
         routeCount = 10;
         counterTime = "00:00";
         currentRoute.SetValueWithoutEvent(new Route(TurnoutID.Turnout01, RedLightPosition.下行入库));

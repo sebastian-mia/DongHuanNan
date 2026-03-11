@@ -49,11 +49,15 @@ public class TurnoutMachineController : MonoBehaviour, IController
 
     private AudioManager audioManager;
     private int playTurnoutMachineSoundIndex;
+    // 🔥 新增：音效节流控制
+    private float lastSoundValue = -1f;      // 上次播放音效时的值
+    private float lastValueChangeTime = 0f;  // 上次值变化的时间
+    private const float SOUND_THRESHOLD = 0.005f;     // 值变化阈值
+    private const float CHANGE_TIMEOUT = 0.1f;      // 变化超时时间（秒）
 
 
     //Modle
     private TurnoutModel turnoutModel;
-
     private bool isWaitingForHandlerReturn = false;
 
     public void Start()
@@ -248,7 +252,21 @@ public class TurnoutMachineController : MonoBehaviour, IController
     {
         if (xRKnob.isSelected)
         {
-            audioManager.PlayturnoutMachineWorkingSound();
+            // 🔥 判断 value 是否在持续变化（0.1秒内是否有变化）
+            bool isValueChanging = Time.time - lastValueChangeTime < CHANGE_TIMEOUT;
+
+            // 更新变化时间戳
+            if (Mathf.Abs(value - lastSoundValue) > 0.001f) // 忽略微小浮点误差
+            {
+                lastValueChangeTime = Time.time;
+            }
+
+            // 只有在持续变化且累积变化超过阈值时才播放
+            if (isValueChanging && Mathf.Abs(value - lastSoundValue) >= SOUND_THRESHOLD)
+            {
+                audioManager.PlayturnoutMachineWorkingSound();
+                lastSoundValue = value;
+            }
         }
 
         if (currentValue <= 0 + deathFloat)
