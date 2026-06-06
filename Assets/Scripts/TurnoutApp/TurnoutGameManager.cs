@@ -14,7 +14,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private GameObject currentSpawnPoint;
 
 
-    //RouteShow
+    //RouteShow Correct
     private readonly string downSideToDownSideRouteShowName = "DownSideToDownSide";
     private readonly string downSideToTranslate1RouteShowName = "DownSideToTranslate1";
     private readonly string downSideToTranslate2RouteShowName = "DownSideToTranslate2";
@@ -26,6 +26,19 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private readonly string translate2ToUpSideRouteShowName = "Translate2ToUpSide";
     private readonly string upSideToUpSideRouteShowName = "UpSideToUpSide";
     private readonly string targetRouteTip = "TargetRouteTip";
+    
+    //RouteShow Error
+    private readonly string downSideToDownSideErrorRouteShowName = "DownSideToDownSideError";
+    private readonly string downSideToTranslate1ErrorRouteShowName = "DownSideToTranslate1Error";
+    private readonly string downSideToTranslate2ErrorRouteShowName = "DownSideToTranslate2Error";
+    private readonly string translate1ToDownSideErrorRouteShowName = "Translate1ToDownSideError";
+    private readonly string translate2ToDownSideErrorRouteShowName = "Translate2ToDownSideError";
+    private readonly string upSideToTranslate1ErrorRouteShowName = "UpSideToTranslate1Error";
+    private readonly string upSideToTranslate2ErrorRouteShowName = "UpSideToTranslate2Error";
+    private readonly string translate1ToUpSideErrorRouteShowName = "Translate1ToUpSideError";
+    private readonly string translate2ToUpSideErrorRouteShowName = "Translate2ToUpSideError";
+    private readonly string upSideToUpSideErrorRouteShowName = "UpSideToUpSide";
+    
     private GameObject targetRoute;
 
     private readonly string scorePanelName = "ScorePanel";
@@ -81,12 +94,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                     turnoutScoreUI.counterTime.text = counterTimeString;
                     turnoutScoreUI.ShowNodeValue();
                 }
-
-                if (turnoutModel.isCorrectRoute)
-                {
-                    ShowRoute();
-                }
-
+                ShowRoute(turnoutModel.isCorrectRoute);
                 JudgeGameStateToPlayVoice();
 
                 turnoutModel.scorePanelIndex++;
@@ -227,56 +235,109 @@ public class TurnoutGameManager : MonoBehaviour, IController
         }
     }
 
-    private void ShowRoute()
+    private void ShowRoute(bool isCorrect)
     {
         if (randomNum == 1)
         {
-            UIManager.Instance.ShowUI(downSideToDownSideRouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(downSideToDownSideRouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(downSideToDownSideErrorRouteShowName);
+            
         }
 
         if (randomNum == 2)
         {
-            UIManager.Instance.ShowUI(downSideToTranslate1RouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(downSideToTranslate1RouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(downSideToTranslate1ErrorRouteShowName);
+           
         }
 
         if (randomNum == 3)
         {
-            UIManager.Instance.ShowUI(downSideToTranslate2RouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(downSideToTranslate2RouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(downSideToTranslate2ErrorRouteShowName);
         }
 
         if (randomNum == 4)
         {
-            UIManager.Instance.ShowUI(translate1ToDownSideRouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(translate1ToDownSideRouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(translate1ToDownSideErrorRouteShowName);
         }
 
         if (randomNum == 5)
         {
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
+                return;
+            }
             UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
+           
         }
 
         if (randomNum == 6)
         {
-            UIManager.Instance.ShowUI(upSideToUpSideRouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(upSideToUpSideRouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(upSideToUpSideErrorRouteShowName);
         }
 
         if (randomNum == 7)
         {
-            UIManager.Instance.ShowUI(upSideToTranslate1RouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(upSideToTranslate1RouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(upSideToTranslate1ErrorRouteShowName);
         }
 
         if (randomNum == 8)
         {
-            UIManager.Instance.ShowUI(upSideToTranslate2RouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(upSideToTranslate2RouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(upSideToTranslate2ErrorRouteShowName);
         }
 
         if (randomNum == 9)
         {
-            UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(translate1ToUpSideErrorRouteShowName);
         }
 
         if (randomNum == 10)
         {
-            UIManager.Instance.ShowUI(translate2ToUpSideRouteShowName);
+            if (turnoutModel.isCorrectRoute)
+            {
+                UIManager.Instance.ShowUI(translate2ToUpSideRouteShowName);
+                return;
+            }
+            UIManager.Instance.ShowUI(translate2ToUpSideErrorRouteShowName);
         }
     }
 

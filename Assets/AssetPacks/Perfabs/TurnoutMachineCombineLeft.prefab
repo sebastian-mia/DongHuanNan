@@ -3024,7 +3024,7 @@ PrefabInstance:
     - target: {fileID: 2925994331754372029, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.263
+      value: 0.187
       objectReference: {fileID: 0}
     - target: {fileID: 2925994331754372029, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}
@@ -3034,7 +3034,7 @@ PrefabInstance:
     - target: {fileID: 2925994331754372029, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 1.3199997
+      value: 1.32
       objectReference: {fileID: 0}
     - target: {fileID: 2925994331754372029, guid: d462c23d988c7d243a22a31e7977d73b,
         type: 3}
@@ -3080,6 +3080,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: TurnoutLockReverse Socket Interactor
+      objectReference: {fileID: 0}
+    - target: {fileID: 8832034095985081360, guid: d462c23d988c7d243a22a31e7977d73b,
+        type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.262
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

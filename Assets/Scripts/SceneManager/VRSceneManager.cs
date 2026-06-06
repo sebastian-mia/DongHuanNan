@@ -314,7 +314,7 @@ public class VRSceneManager : MonoBehaviour, IController
                 var fadeTask = FadeFromBlack();
                 loadingScreen?.HideImmediate();
                 await fadeTask;
-                Resources.UnloadUnusedAssets();
+                // Resources.UnloadUnusedAssets();
             }
         }
         catch (Exception e)
