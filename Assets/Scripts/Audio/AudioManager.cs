@@ -25,6 +25,8 @@ public class AudioManager : IUtility
     private string turnoutProjectRouteFaultSoundPath = $"resources://Voice/进路错误";
     private string turnoutProjectRedLightFaultSoundPath = $"resources://Voice/红闪灯错误位置";
     private string turnoutProjectByeSoundPath = $"resources://Voice/再见";
+    private string winnerSoundPath=$"resources://Voice/胜利";
+    private string failureSoundPath=$"resources://Voice/失败";
 
     //Queue
     private Queue<string> voiceQueue = new Queue<string>();
@@ -84,22 +86,30 @@ public class AudioManager : IUtility
 
     public void PlayVoiceInPerfectComplete()
     {
-        AudioKit.PlayVoice(turnoutProjectCompletePerfectSoundPath);
+        EnqueueVoice(winnerSoundPath);
+        EnqueueVoice(turnoutProjectCompletePerfectSoundPath);
+        // AudioKit.PlayVoice(turnoutProjectCompletePerfectSoundPath);
     }
 
     public void PlayVoiceInComplete()
     {
-        AudioKit.PlayVoice(turnoutProjectCompleteSoundPath);
+        EnqueueVoice(winnerSoundPath);
+        EnqueueVoice(turnoutProjectCompleteSoundPath);
+        // AudioKit.PlayVoice(turnoutProjectCompleteSoundPath);
     }
 
     public void PlayVoiceInRouteFault()
     {
-        AudioKit.PlayVoice(turnoutProjectRouteFaultSoundPath);
+        EnqueueVoice(failureSoundPath);
+        EnqueueVoice(turnoutProjectRouteFaultSoundPath);
+        // AudioKit.PlayVoice(turnoutProjectRouteFaultSoundPath);
     }
 
     public void PlayVoiceInRedLightFault()
     {
-        AudioKit.PlayVoice(turnoutProjectRedLightFaultSoundPath);
+        EnqueueVoice(failureSoundPath);
+        EnqueueVoice(turnoutProjectRedLightFaultSoundPath);
+        // AudioKit.PlayVoice(turnoutProjectRedLightFaultSoundPath);
     }
 
     public void PlayVoiceInBye()

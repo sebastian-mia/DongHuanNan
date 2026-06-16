@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using QFramework;
 using TMPro;
@@ -12,6 +13,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     public readonly string spawnPointInUpPath = "Perfab/StartPointInUp";
     private bool currentSpawnPointIsDown;
     private GameObject currentSpawnPoint;
+    [SerializeField] private List<ParticleSystem> confettis = new List<ParticleSystem>();
 
 
     //RouteShow Correct
@@ -26,7 +28,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private readonly string translate2ToUpSideRouteShowName = "Translate2ToUpSide";
     private readonly string upSideToUpSideRouteShowName = "UpSideToUpSide";
     private readonly string targetRouteTip = "TargetRouteTip";
-    
+
     //RouteShow Error
     private readonly string downSideToDownSideErrorRouteShowName = "DownSideToDownSideError";
     private readonly string downSideToTranslate1ErrorRouteShowName = "DownSideToTranslate1Error";
@@ -38,7 +40,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
     private readonly string translate1ToUpSideErrorRouteShowName = "Translate1ToUpSideError";
     private readonly string translate2ToUpSideErrorRouteShowName = "Translate2ToUpSideError";
     private readonly string upSideToUpSideErrorRouteShowName = "UpSideToUpSide";
-    
+
     private GameObject targetRoute;
 
     private readonly string scorePanelName = "ScorePanel";
@@ -94,6 +96,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                     turnoutScoreUI.counterTime.text = counterTimeString;
                     turnoutScoreUI.ShowNodeValue();
                 }
+
                 ShowRoute(turnoutModel.isCorrectRoute);
                 JudgeGameStateToPlayVoice();
 
@@ -244,8 +247,8 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(downSideToDownSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(downSideToDownSideErrorRouteShowName);
-            
         }
 
         if (randomNum == 2)
@@ -255,8 +258,8 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(downSideToTranslate1RouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(downSideToTranslate1ErrorRouteShowName);
-           
         }
 
         if (randomNum == 3)
@@ -266,6 +269,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(downSideToTranslate2RouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(downSideToTranslate2ErrorRouteShowName);
         }
 
@@ -276,6 +280,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(translate1ToDownSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(translate1ToDownSideErrorRouteShowName);
         }
 
@@ -286,8 +291,8 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(translate2ToDownSideRouteShowName);
-           
         }
 
         if (randomNum == 6)
@@ -297,6 +302,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(upSideToUpSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(upSideToUpSideErrorRouteShowName);
         }
 
@@ -307,6 +313,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(upSideToTranslate1RouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(upSideToTranslate1ErrorRouteShowName);
         }
 
@@ -317,6 +324,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(upSideToTranslate2RouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(upSideToTranslate2ErrorRouteShowName);
         }
 
@@ -327,6 +335,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(translate1ToUpSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(translate1ToUpSideErrorRouteShowName);
         }
 
@@ -337,6 +346,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
                 UIManager.Instance.ShowUI(translate2ToUpSideRouteShowName);
                 return;
             }
+
             UIManager.Instance.ShowUI(translate2ToUpSideErrorRouteShowName);
         }
     }
@@ -474,6 +484,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
             if (!turnoutModel.nodeValues[i].isConsistence)
             {
                 nodeHasFault = true;
+                StartCoroutine("PlayConfettis");
                 audioManager.PlayVoiceInComplete();
                 return;
             }
@@ -481,6 +492,7 @@ public class TurnoutGameManager : MonoBehaviour, IController
 
         if (!nodeHasFault)
         {
+            StartCoroutine("PlayConfettis");
             audioManager.PlayVoiceInPerfectComplete();
             return;
         }
@@ -503,6 +515,15 @@ public class TurnoutGameManager : MonoBehaviour, IController
         int secs = second % 60;
         counterTimeText.text = hours.ToString("00") + ":" + mins.ToString("00") + ":" + secs.ToString("00");
         return mins.ToString("00") + ":" + secs.ToString("00");
+    }
+
+    private IEnumerator PlayConfettis()
+    {
+        foreach (var confetti in confettis)
+        {
+            confetti.Play();
+        }
+        yield return null;
     }
 
     public IArchitecture GetArchitecture()
